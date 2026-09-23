@@ -43,3 +43,8 @@ function getMemberInfo(id: number): string {
 console.log(getMemberInfo(1));
 console.log(getMemberInfo(2));
 console.log(getMemberInfo(999));
+
+const studyHour: number | undefined = 0;
+
+console.log(studyHour || 1);
+console.log(studyHour ?? 1);
