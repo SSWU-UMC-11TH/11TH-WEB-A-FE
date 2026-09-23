@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Header from './components/header';
 import MovieGrid from './components/movie-grid';
+import Pagination from './components/pagination';
 import { movies as initialMovies } from './data/movies';
 import './styles/app.css';
 
@@ -28,6 +29,7 @@ export default function App() {
           movies={movies}
           onToggleBookmark={handleToggleBookmark}
         />
+        <Pagination />
       </main>
     </>
   );
