@@ -1,5 +1,12 @@
 type MemberRole = "Web" | "Spring";
 
+interface StudyMemberInterface {
+  id: number;
+  name: string;
+  role: MemberRole;
+  githubId?: string;
+}
+
 type StudyMember = {
   id: number;
   name: string;
