@@ -67,3 +67,20 @@
   line-height: 1.4;
   color: #969DA8;
 }
+
+@media (max-width: 1024px) {
+  .movie-card {
+    width: 100%;
+  }
+
+  .movie-card__poster-wrapper {
+    width: 100%;
+  }
+
+  .movie-card__poster {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 241 / 274;
+    object-fit: cover;
+  }
+}
