@@ -16,11 +16,18 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
         />
 
         <button
-          className="bookmark-button"
-          onClick={() => onToggleBookmark(movie.id)}
-        >
-          {movie.isBookmarked ? "★" : "☆"}
-        </button>
+  className={`bookmark-button ${movie.isBookmarked ? "active" : ""}`}
+  onClick={() => onToggleBookmark(movie.id)}
+>
+  <img
+    src={
+      movie.isBookmarked
+        ? "/icons/bookmark.svg"
+        : "/icons/bookmark-outline.svg"
+    }
+    alt="북마크"
+  />
+</button>
       </div>
 
       <h2 className="movie-title">{movie.title}</h2>

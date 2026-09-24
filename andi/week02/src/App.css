@@ -143,3 +143,14 @@ body {
   color: white;
   border-color: #3478f6;
 }
+
+.bookmark-button img {
+  width: 20px;
+  height: 20px;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+.bookmark-button.active {
+  background-color: #3478f6;
+}
