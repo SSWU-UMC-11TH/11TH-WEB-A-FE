@@ -5,7 +5,7 @@
 .movie-card__poster-wrapper {
   position: relative;
   width: 241px;
-  height: 274px;
+  aspect-ratio: 241 / 274;
   overflow: hidden;
   border-radius: 8px;
 }
@@ -75,12 +75,13 @@
 
   .movie-card__poster-wrapper {
     width: 100%;
+    height: auto;
+    aspect-ratio: 241 / 274;
   }
 
   .movie-card__poster {
     width: 100%;
-    height: auto;
-    aspect-ratio: 241 / 274;
+    height: 100%;
     object-fit: cover;
   }
 }

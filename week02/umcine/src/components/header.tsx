@@ -16,6 +16,7 @@ export default function Header() {
             <a
               className="header__nav-link header__nav-link--active"
               href="#"
+              aria-current="page"
             >
               영화
             </a>
