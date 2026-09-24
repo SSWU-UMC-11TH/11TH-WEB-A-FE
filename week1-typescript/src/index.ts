@@ -1,9 +1,9 @@
-type memberRole = 'leader' | 'member';
+type MemberRole = 'leader' | 'member';
 
 type Member = {
   memberId: number;
   memberName: string;
-  role: memberRole;
+  role: MemberRole;
   githubId?: string;
 };
 
@@ -31,7 +31,7 @@ function findMember(memberId: number) {
     return '존재하지 않는 회원입니다';
   }
 
-  const github = member.githubId ?? ' 가 없음';
+  const github = member.githubId ?? '없음';
   return member.memberName + '/githubId ' + github;
 }
 
