@@ -18,6 +18,8 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
         <button
   className={`bookmark-button ${movie.isBookmarked ? "active" : ""}`}
   onClick={() => onToggleBookmark(movie.id)}
+  aria-label={`${movie.title} 북마크`}
+  aria-pressed={movie.isBookmarked}
 >
   <img
     src={
@@ -25,7 +27,8 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
         ? "/icons/bookmark.svg"
         : "/icons/bookmark-outline.svg"
     }
-    alt="북마크"
+    alt=""
+    aria-hidden="true"
   />
 </button>
       </div>
