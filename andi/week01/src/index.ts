@@ -21,7 +21,7 @@ const members: StudyMember[] = [
   },
 ];
 
-function createMemberMessage(memberId: number) {
+function createMemberMessage(memberId: number): string {
   const member = members.find((member) => member.id === memberId);
 
   if (!member) {
