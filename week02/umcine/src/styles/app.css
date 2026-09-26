@@ -1,0 +1,25 @@
+.main {
+  width: 100%;
+  padding: 24px 80px 80px;
+  background-color: #f7f8fa;
+}
+
+.main__title {
+  margin: 0 0 24px;
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #17191E;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 24px 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 20px;
+  }
+}
