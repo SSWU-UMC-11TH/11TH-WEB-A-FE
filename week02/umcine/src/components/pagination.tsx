@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import '../styles/pagination.css';
+import { useState } from "react";
+import "../styles/pagination.css";
 
 export default function Pagination() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,7 +13,7 @@ export default function Pagination() {
           key={page}
           type="button"
           className={`pagination__button ${
-            currentPage === page ? 'pagination__button--active' : ''
+            currentPage === page ? "pagination__button--active" : ""
           }`}
           onClick={() => setCurrentPage(page)}
         >

@@ -1,4 +1,4 @@
-import '../styles/header.css';
+import "../styles/header.css";
 
 export default function Header() {
   return (
@@ -30,11 +30,7 @@ export default function Header() {
         </div>
 
         <div className="header__right">
-          <button
-            className="header__search"
-            type="button"
-            aria-label="검색"
-          >
+          <button className="header__search" type="button" aria-label="검색">
             <img src="/icons/search.svg" alt="" />
           </button>
 
