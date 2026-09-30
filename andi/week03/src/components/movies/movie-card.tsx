@@ -24,24 +24,24 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
         </Link>
 
         <button
-  type="button"
-  aria-label={movie.isBookmarked ? "북마크 해제" : "북마크 추가"}
-  className={cn(
-    "absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md",
-    movie.isBookmarked ? "bg-blue-600" : "bg-black/60"
-  )}
-  onClick={() => onToggleBookmark(movie.id)}
->
-  <img
-    src={
-      movie.isBookmarked
-        ? "/icons/bookmark.svg"
-        : "/icons/bookmark-outline.svg"
-    }
-    alt=""
-    className="h-5 w-5 brightness-0 invert"
-  />
-</button>
+          type="button"
+          aria-label={movie.isBookmarked ? "북마크 해제" : "북마크 추가"}
+          className={cn(
+            "absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md",
+            movie.isBookmarked ? "bg-blue-600" : "bg-black/60"
+          )}
+          onClick={() => onToggleBookmark(movie.id)}
+        >
+          <img
+            src={
+              movie.isBookmarked
+                ? "/icons/bookmark.svg"
+                : "/icons/bookmark-outline.svg"
+            }
+            alt=""
+            className="h-5 w-5 brightness-0 invert"
+          />
+        </button>
       </div>
 
       <h2 className="mt-3 truncate text-base font-semibold text-gray-900">
