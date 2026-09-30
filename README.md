@@ -1,4 +1,4 @@
-# 11TH-WEB-A
+# 11TH-WEB-A-FE
 
 UMC 11기 스터디 및 미션 제출을 위한 Repository입니다.
 
