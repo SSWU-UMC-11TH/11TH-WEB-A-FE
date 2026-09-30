@@ -11,7 +11,8 @@ export const movies: Movie[] = [
     genres: ["SF", "액션", "모험"],
     runtime: "2시간 25분",
     tagline: "스파이더맨의 새로운 날을 확인하라!",
-    overview: "모두의 기억에서 사라진 피터 파커가 새로운 힘과 자신의 정체를 아는 적을 마주해요.",
+    overview:
+      "모두의 기억에서 사라진 피터 파커가 새로운 힘과 자신의 정체를 아는 적을 마주한다.",
     isBookmarked: false,
   },
   {
@@ -24,7 +25,8 @@ export const movies: Movie[] = [
     genres: ["모험", "드라마"],
     runtime: "2시간 30분",
     tagline: "집으로 돌아가기 위한 가장 긴 여정",
-    overview: "긴 전쟁을 마친 영웅이 수많은 시련을 지나 고향으로 돌아가는 여정을 그려요.",
+    overview:
+      "긴 전쟁을 마친 영웅이 수많은 시련을 지나 고향으로 돌아가는 여정을 그린다.",
     isBookmarked: true,
   },
   {
@@ -37,7 +39,8 @@ export const movies: Movie[] = [
     genres: ["액션", "모험", "SF"],
     runtime: "2시간 28분",
     tagline: "모든 세계의 운명이 하나로 이어진다",
-    overview: "정체가 드러난 피터 파커가 도움을 청하는 과정에서 여러 세계의 문이 열려요.",
+    overview:
+      "정체가 드러난 피터 파커는 닥터 스트레인지에게 도움을 청하지만 멀티버스의 문이 열리고 만다.",
     isBookmarked: false,
   },
   {
@@ -50,7 +53,8 @@ export const movies: Movie[] = [
     genres: ["스릴러", "미스터리"],
     runtime: "1시간 42분",
     tagline: "마지막 문을 열면 진실이 드러난다",
-    overview: "외딴 저택에 모인 사람들이 감춰진 사건의 흔적을 발견해요.",
+    overview:
+      "외딴 저택에 모인 사람들이 감춰진 사건의 흔적을 발견한다.",
     isBookmarked: false,
   },
   {
@@ -63,7 +67,8 @@ export const movies: Movie[] = [
     genres: ["애니메이션", "코미디", "모험"],
     runtime: "1시간 35분",
     tagline: "작은 영웅들의 거대한 소동",
-    overview: "미니언들이 도시를 찾아온 몬스터와 친구가 되며 새로운 모험을 시작해요.",
+    overview:
+      "미니언들이 도시를 찾아온 몬스터와 친구가 되며 새로운 모험을 시작한다.",
     isBookmarked: false,
   },
   {
@@ -76,7 +81,8 @@ export const movies: Movie[] = [
     genres: ["SF", "스릴러"],
     runtime: "1시간 48분",
     tagline: "하나의 신호가 모두를 바꾼다",
-    overview: "고립된 연구 기지의 구성원들이 정체를 알 수 없는 신호와 마주해요.",
+    overview:
+      "고립된 연구 기지의 구성원들이 정체를 알 수 없는 신호와 마주한다.",
     isBookmarked: false,
   },
   {
@@ -89,7 +95,8 @@ export const movies: Movie[] = [
     genres: ["애니메이션", "모험", "가족"],
     runtime: "1시간 45분",
     tagline: "장난감들의 새로운 모험이 시작된다",
-    overview: "우디와 친구들이 새로운 주인을 만나며 장난감의 의미를 다시 찾아가요.",
+    overview:
+      "우디와 친구들이 새로운 주인을 만나며 장난감의 의미를 다시 찾아간다.",
     isBookmarked: true,
   },
   {
@@ -102,7 +109,8 @@ export const movies: Movie[] = [
     genres: ["액션", "모험", "드라마"],
     runtime: "2시간 10분",
     tagline: "전설의 마지막 화살",
-    overview: "오랜 싸움을 마친 로빈 후드가 자신의 마지막 선택과 마주해요.",
+    overview:
+      "오랜 싸움을 마친 로빈 후드가 자신의 마지막 선택과 마주한다.",
     isBookmarked: false,
   },
   {
@@ -115,7 +123,8 @@ export const movies: Movie[] = [
     genres: ["스릴러", "드라마"],
     runtime: "1시간 50분",
     tagline: "완벽한 믿음이 집착으로 변한다",
-    overview: "한 사람을 향한 믿음이 점차 위험한 집착으로 바뀌기 시작해요.",
+    overview:
+      "한 사람을 향한 믿음이 점차 위험한 집착으로 바뀌기 시작한다.",
     isBookmarked: false,
   },
   {
@@ -128,7 +137,8 @@ export const movies: Movie[] = [
     genres: ["공포", "스릴러"],
     runtime: "1시간 40분",
     tagline: "꺼진 불길 속에서 악이 깨어난다",
-    overview: "버려진 오두막을 찾은 사람들이 오래 잠들어 있던 악을 깨워요.",
+    overview:
+      "버려진 오두막을 찾은 사람들이 오래 잠들어 있던 악을 깨운다.",
     isBookmarked: false,
   },
 ];
