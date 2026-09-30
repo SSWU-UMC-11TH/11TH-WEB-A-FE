@@ -12,21 +12,36 @@ export default function Header() {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[#17191E]">
               <img className="h-6 w-6" src="/icons/movie.svg" alt="" />
             </span>
+
             <span>UMCine</span>
           </Link>
 
           <nav className="flex items-center gap-[30px]">
             <Link
-              className="relative py-2 text-sm font-bold text-[#17191E] underline"
               to="/"
-              aria-current="page"
+              activeOptions={{ exact: true }}
+              className="relative py-2 text-sm font-bold text-[#606774] no-underline"
+              activeProps={{
+                style: {
+                  color: "#17191E",
+                  textDecoration: "underline",
+                },
+                "aria-current": "page",
+              }}
             >
               영화
             </Link>
 
             <Link
-              className="relative py-2 text-sm font-bold text-[#606774] no-underline"
               to="/search"
+              className="relative py-2 text-sm font-bold text-[#606774] no-underline"
+              activeProps={{
+                style: {
+                  color: "#17191E",
+                  textDecoration: "underline",
+                },
+                "aria-current": "page",
+              }}
             >
               검색
             </Link>
