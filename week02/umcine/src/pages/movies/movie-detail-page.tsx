@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { movies } from "../../data/movies";
+import { cn } from "../../utils/cn";
 
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: "/movies/$movieId" });
   const movie = movies.find((item) => item.id === Number(movieId));
+  const [rating, setRating] = useState(0);
+  const [review, setReview] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
 
   if (!movie) {
     return (
@@ -103,7 +108,14 @@ export function MovieDetailPage() {
                 key={star}
                 type="button"
                 aria-label={`${star}점`}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#E3E6EB] bg-white text-2xl text-[#606774]"
+                onClick={() => {
+                  setRating(star);
+                  setIsSaved(false);
+                }}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-lg border border-[#E3E6EB] bg-white text-2xl text-[#606774]",
+                  star <= rating && "border-[#2563EB] text-[#2563EB]",
+                )}
               >
                 ★
               </button>
@@ -111,16 +123,28 @@ export function MovieDetailPage() {
           </div>
 
           <textarea
+            value={review}
+            onChange={(event) => {
+              setReview(event.target.value);
+              setIsSaved(false);
+            }}
             placeholder="영화를 보고 느낀 점을 남겨보세요."
             className="mt-3 h-[105px] w-full resize-none rounded-lg border border-[#E3E6EB] bg-white p-4 text-sm outline-none placeholder:text-[#969DA8]"
           />
 
           <button
             type="button"
+            onClick={() => setIsSaved(true)}
             className="mt-3 h-[42px] w-full rounded-lg bg-[#17191E] text-sm font-bold text-white"
           >
             평점 저장
           </button>
+
+          {isSaved && (
+            <p className="mt-2 text-xs text-[#606774]">
+              평점이 저장되었습니다.
+            </p>
+          )}
         </aside>
       </section>
     </main>
