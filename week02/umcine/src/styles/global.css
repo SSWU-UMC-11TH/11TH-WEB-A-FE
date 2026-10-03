@@ -1,5 +1,45 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/pretendard/Pretendard-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/pretendard/Pretendard-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/pretendard/Pretendard-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/pretendard/Pretendard-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/pretendard/Pretendard-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -7,17 +47,20 @@
 html,
 body,
 #root {
-width: 100%;
+  width: 100%;
   min-height: 100%;
   margin: 0;
 }
 
 body {
   min-width: 320px;
+  font-family: 'Pretendard', system-ui, sans-serif;
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
 }
 
