@@ -9,7 +9,7 @@ interface MovieCardProps {
 
 export default function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
   return (
-    <article className="w-full min-[1025px]:w-[241px]">
+    <article className="w-full">
       <div className="relative aspect-[241/274] w-full overflow-hidden rounded-lg">
         <Link
           to="/movies/$movieId"
