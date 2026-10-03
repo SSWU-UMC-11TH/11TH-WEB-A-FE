@@ -34,14 +34,14 @@ export function SearchPage() {
   return (
     <main className="min-h-[calc(100vh-91px)] bg-[#f7f8fa]">
       {!normalizedQuery ? (
-        <section className="flex flex-col items-center pt-[165px]">
+        <section className="flex flex-col items-center px-5 pt-[165px]">
           <h1 className="mb-8 text-[46px] leading-[1.4] font-bold text-[#17191E]">
             어떤 영화를 찾고 있나요?
           </h1>
 
           <form
             onSubmit={handleSubmit}
-            className="flex h-[74px] w-[790px] items-center rounded-[12px] border-2 border-[#17191E] bg-white pr-[17px] pl-[21px] shadow-[0_8px_20px_rgba(0,0,0,0.08)]"
+            className="flex h-[74px] w-full max-w-[790px] items-center rounded-[12px] border-2 border-[#17191E] bg-white pr-[17px] pl-[21px] shadow-[0_8px_20px_rgba(0,0,0,0.08)]"
           >
             <img src="/icons/search.svg" alt="" className="mr-4 h-6 w-6" />
 
