@@ -30,6 +30,8 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
           )}
           onClick={() => onToggleBookmark(movie.id)}
           type="button"
+          aria-label={`${movie.title} 북마크`}
+          aria-pressed={movie.isBookmarked}
         >
           <img
             className="block h-6 w-6 brightness-0 invert"

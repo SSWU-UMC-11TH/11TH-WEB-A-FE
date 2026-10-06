@@ -2,7 +2,6 @@ import { useState } from 'react';
 import MovieGrid from '../../components/movies/movie-grid';
 import { movies as initialMovies } from '../../data/movies';
 import type { Movie } from '../../types/movie';
-import '../../App.css';
 
 export function MovieListPage() {
   const [movies, setMovies] = useState<Movie[]>(initialMovies);

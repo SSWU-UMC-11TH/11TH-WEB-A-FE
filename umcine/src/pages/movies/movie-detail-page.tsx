@@ -152,7 +152,7 @@ export function MovieDetailPage() {
             onClick={handleSaveRating}
             disabled={rating === 0}
             className={cn(
-              'mt-2 w-full h-[42px] rounded-md bg-[#17191e] py-3 text-sm font-Extrabold text-white',
+              'mt-2 w-full h-[42px] rounded-md bg-[#17191e] py-3 text-sm font-extrabold text-white',
             )}
           >
             평점 저장
