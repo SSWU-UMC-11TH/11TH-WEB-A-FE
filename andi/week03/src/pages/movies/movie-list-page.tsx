@@ -1,21 +1,7 @@
-import { useState } from "react";
 import MovieGrid from "../../components/movies/movie-grid";
-import { movies as initialMovies } from "../../data/movies";
-import type { Movie } from "../../types/movie";
+import { movies } from "../../data/movies";
 
 export function MovieListPage() {
-  const [movies, setMovies] = useState<Movie[]>(initialMovies);
-
-  const handleToggleBookmark = (id: number) => {
-    setMovies((currentMovies) =>
-      currentMovies.map((movie) =>
-        movie.id === id
-          ? { ...movie, isBookmarked: !movie.isBookmarked }
-          : movie
-      )
-    );
-  };
-
   return (
     <main className="min-h-[calc(100vh-64px)] bg-gray-50">
       <div className="mx-auto max-w-[1280px] px-8 py-10">
@@ -23,10 +9,7 @@ export function MovieListPage() {
           영화 목록
         </h1>
 
-        <MovieGrid
-          movies={movies}
-          onToggleBookmark={handleToggleBookmark}
-        />
+        <MovieGrid movies={movies} />
       </div>
     </main>
   );
