@@ -1,15 +1,17 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { useEffect, useState, type SubmitEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { movies } from '../../data/movies';
+import { useBookmarkStore } from '../../stores/bookmark-store';
 
 export function SearchPage() {
   const { query } = useSearch({ from: '/search' });
   const navigate = useNavigate({ from: '/search' });
   const [searchText, setSearchText] = useState(query ?? '');
 
-  useEffect(() => {
-    setSearchText(query ?? '');
-  }, [query]);
+  const bookmarkedMovieIds = useBookmarkStore(
+    (state) => state.bookmarkedMovieIds,
+  );
+  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
   const normalizedQuery = query?.trim().toLowerCase() ?? '';
   const searchResults = normalizedQuery
@@ -76,23 +78,43 @@ export function SearchPage() {
             <p>검색 결과가 없어요.</p>
           ) : (
             <ul className="mt-5 grid grid-cols-1 gap-x-[40px] gap-y-5 lg:grid-cols-2">
-              {searchResults.map((movie) => (
-                <li
-                  key={movie.id}
-                  className="flex min-w-0 gap-4 border-b border-[#E3E6EB] pb-5"
-                >
-                  {/* 영화 포스터 */}
-                  <img
-                    src={movie.posterPath}
-                    alt={`${movie.title} 포스터`}
-                    className="h-[190px] w-[126px] shrink-0 rounded-lg object-cover"
-                  />
+              {searchResults.map((movie) => {
+                const isBookmarked = bookmarkedMovieIds.includes(movie.id);
+                return (
+                  <li
+                    key={movie.id}
+                    className="flex min-w-0 gap-4 border-b border-[#E3E6EB] pb-5"
+                  >
+                    {/* 영화 포스터 */}
+                    <img
+                      src={movie.posterPath}
+                      alt={`${movie.title} 포스터`}
+                      className="h-[190px] w-[126px] shrink-0 rounded-lg object-cover"
+                    />
 
-                  {/* 영화 정보 */}
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <h3 className="text-base font-bold text-[#17191E]">
-                      {movie.title}
-                    </h3>
+                    {/* 영화 정보 */}
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex items-center justify-between"></div>
+                      <h3 className="text-base font-bold text-[#17191E]">
+                        {movie.title}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => toggleBookmark(movie.id)}
+                        aria-label={`${movie.title} 북마크`}
+                        aria-pressed={isBookmarked}
+                      >
+                        <img
+                          src={
+                            isBookmarked
+                              ? '/icons/bookmark.svg'
+                              : '/icons/bookmark-outline.svg'
+                          }
+                          alt=""
+                          className="h-5 w-5"
+                        />
+                      </button>
+                    </div>
 
                     <div className="mt-1 flex flex-wrap gap-2 text-xs text-[#969DA8]">
                       <span>{movie.originalTitle}</span>
@@ -110,9 +132,9 @@ export function SearchPage() {
                     >
                       상세 보기 →
                     </Link>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </>

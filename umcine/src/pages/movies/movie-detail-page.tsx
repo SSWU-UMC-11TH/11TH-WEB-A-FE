@@ -2,13 +2,19 @@ import { useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { movies } from '../../data/movies';
 import { cn } from '../../utils/cn';
+import { useBookmarkStore } from '../../stores/bookmark-store';
 
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: '/movies/$movieId' });
   const movie = movies.find((item) => item.id === Number(movieId));
-  const [isBookmarked, setIsBookmarked] = useState(
-    movie?.isBookmarked ?? false,
+
+  const bookmarkedMovieIds = useBookmarkStore(
+    (state) => state.bookmarkedMovieIds,
   );
+
+  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+
+  const isBookmarked = movie ? bookmarkedMovieIds.includes(movie.id) : false;
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
 
@@ -27,7 +33,7 @@ export function MovieDetailPage() {
   if (!movie) {
     return (
       <main className="mx-auto w-full max-w-[1440px] px-6 py-20 text-center">
-        <h1 className="text-2x1 font-bold">영화를 찾을 수 없어요.</h1>
+        <h1 className="text-2xl font-bold">영화를 찾을 수 없어요.</h1>
         <Link to="/" className="mt-6 inline-block text-blue-600">
           영화 목록으로 돌아가기
         </Link>
@@ -91,7 +97,7 @@ export function MovieDetailPage() {
 
           <button
             type="button"
-            onClick={() => setIsBookmarked((prev) => !prev)}
+            onClick={() => toggleBookmark(movie.id)}
             aria-pressed={isBookmarked}
             className={cn(
               'mt-4 flex h-[42px] w-[107px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-white px-2 text-[14px] font-extrabold text-white',
