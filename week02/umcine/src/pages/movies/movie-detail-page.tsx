@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { movies } from "../../data/movies";
 import { cn } from "../../utils/cn";
+import { BookmarkButton } from "../../components/bookmark-button";
 
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: "/movies/$movieId" });
@@ -81,17 +82,7 @@ export function MovieDetailPage() {
             {movie.overview}
           </p>
 
-          <button
-            type="button"
-            className="mt-5 flex h-[42px] items-center gap-2 rounded-lg bg-[#2563EB] px-5 text-sm font-bold text-white"
-          >
-            <img
-              src="/icons/bookmark-outline.svg"
-              alt=""
-              className="h-4 w-4 brightness-0 invert"
-            />
-            즐겨찾기
-          </button>
+          <BookmarkButton movieId={movie.id} variant="detail" />
         </div>
 
         {/* 평점 */}

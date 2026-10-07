@@ -3,9 +3,13 @@ import { cn } from "../utils/cn";
 
 interface BookmarkButtonProps {
   movieId: number;
+  variant?: "icon" | "detail";
 }
 
-export function BookmarkButton({ movieId }: BookmarkButtonProps) {
+export function BookmarkButton({
+  movieId,
+  variant = "icon",
+}: BookmarkButtonProps) {
   const isBookmarked = useBookmarkStore((state) =>
     state.bookmarkedMovieIds.includes(movieId),
   );
@@ -13,6 +17,30 @@ export function BookmarkButton({ movieId }: BookmarkButtonProps) {
   const toggleBookmark = useBookmarkStore(
     (state) => state.toggleBookmark,
   );
+
+  if (variant === "detail") {
+    return (
+      <button
+        type="button"
+        onClick={() => toggleBookmark(movieId)}
+        className={cn(
+          "mt-5 flex h-[42px] items-center gap-2 rounded-lg px-5 text-sm font-bold text-white",
+          isBookmarked ? "bg-[#17191E]" : "bg-[#2563EB]",
+        )}
+      >
+        <img
+          src={
+            isBookmarked
+              ? "/icons/bookmark.svg"
+              : "/icons/bookmark-outline.svg"
+          }
+          alt=""
+          className="h-4 w-4 brightness-0 invert"
+        />
+        {isBookmarked ? "즐겨찾기 해제" : "즐겨찾기"}
+      </button>
+    );
+  }
 
   return (
     <button

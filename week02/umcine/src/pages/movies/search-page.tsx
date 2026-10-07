@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import { movies } from "../../data/movies";
+import { BookmarkButton } from "../../components/bookmark-button";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
@@ -118,17 +119,20 @@ export function SearchPage() {
                   key={movie.id}
                   className="flex min-h-[245px] gap-5 border-b border-[#E3E6EB] py-5"
                 >
-                  <Link
-                    to="/movies/$movieId"
-                    params={{ movieId: String(movie.id) }}
-                    className="shrink-0"
-                  >
-                    <img
-                      src={movie.posterPath}
-                      alt={`${movie.title} 포스터`}
-                      className="h-[190px] w-[126px] rounded-lg object-cover"
-                    />
-                  </Link>
+                  <div className="relative h-[190px] w-[126px] shrink-0">
+                    <Link
+                      to="/movies/$movieId"
+                      params={{ movieId: String(movie.id) }}
+                    >
+                      <img
+                        src={movie.posterPath}
+                        alt={`${movie.title} 포스터`}
+                        className="h-[190px] w-[126px] rounded-lg object-cover"
+                      />
+                    </Link>
+
+                    <BookmarkButton movieId={movie.id} />
+                  </div>
 
                   <div className="min-w-0 pt-1">
                     <Link
