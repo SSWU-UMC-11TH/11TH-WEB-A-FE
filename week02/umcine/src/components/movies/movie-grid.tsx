@@ -3,12 +3,10 @@ import MovieCard from "./movie-card";
 
 interface MovieGridProps {
   movies: Movie[];
-  onToggleBookmark: (movieId: number) => void;
 }
 
 export default function MovieGrid({
-  movies,
-  onToggleBookmark,
+  movies
 }: MovieGridProps) {
   return (
     <section
@@ -23,7 +21,6 @@ export default function MovieGrid({
         <MovieCard
           key={movie.id}
           movie={movie}
-          onToggleBookmark={onToggleBookmark}
         />
       ))}
     </section>
