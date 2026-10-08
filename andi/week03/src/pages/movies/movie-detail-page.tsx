@@ -1,18 +1,10 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { movies } from "../../data/movies";
-import { useBookmarkStore } from "../../stores/bookmark-store";
+import BookmarkButton from "../../components/movies/bookmark-button";
 
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: "/movies/$movieId" });
   const movie = movies.find((item) => item.id === Number(movieId));
-
-  const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(Number(movieId))
-  );
-
-  const toggleBookmark = useBookmarkStore(
-    (state) => state.toggleBookmark
-  );
 
   if (!movie) {
     return (
@@ -93,23 +85,10 @@ export function MovieDetailPage() {
               {movie.overview}
             </p>
 
-            <button
-              type="button"
-              onClick={() => toggleBookmark(movie.id)}
-              className="mt-6 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white"
-            >
-              <img
-                src={
-                  isBookmarked
-                    ? "/icons/bookmark.svg"
-                    : "/icons/bookmark-outline.svg"
-                }
-                alt=""
-                aria-hidden="true"
-                className="h-4 w-4 brightness-0 invert"
-              />
-              {isBookmarked ? "북마크 해제" : "북마크 추가"}
-            </button>
+            <BookmarkButton
+              movieId={movie.id}
+              variant="detail"
+            />
           </div>
         </div>
       </section>
