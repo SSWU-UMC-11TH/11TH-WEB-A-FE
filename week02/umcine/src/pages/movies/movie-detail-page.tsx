@@ -35,7 +35,7 @@ export function MovieDetailPage() {
         {/* 영화 목록 */}
         <Link
           to="/"
-          className="absolute top-8 left-20 z-10 flex items-center gap-1 whitespace-nowrap text-sm font-bold text-white no-underline"
+          className="absolute top-8 left-4 z-10 flex items-center gap-1 whitespace-nowrap text-sm font-bold text-white no-underline md:left-20"
         >
           <img
             src="/icons/chevron-left.svg"
@@ -46,8 +46,8 @@ export function MovieDetailPage() {
         </Link>
 
         {/* 영화 기본 정보 */}
-        <div className="absolute bottom-7 left-20 z-10 text-white">
-          <h1 className="text-[46px] leading-[1.3] font-bold">{movie.title}</h1>
+        <div className="absolute right-4 bottom-7 left-4 z-10 text-white md:right-auto md:left-20">
+          <h1 className="text-3xl leading-[1.3] font-bold md:text-[46px]">{movie.title}</h1>
 
           <p className="mt-2 text-sm">{movie.originalTitle}</p>
 
@@ -62,7 +62,7 @@ export function MovieDetailPage() {
       </section>
 
       {/* 상세 정보 */}
-      <section className="flex px-[80px] py-[24px]">
+      <section className="flex flex-col gap-6 px-4 py-6 xl:flex-row xl:gap-0 xl:px-[80px]">
         {/* 포스터 */}
         <div className="shrink-0">
           <img
@@ -73,7 +73,7 @@ export function MovieDetailPage() {
         </div>
 
         {/* 영화 설명 */}
-        <div className="min-w-0 flex-1 px-8">
+        <div className="min-w-0 flex-1 px-0 xl:px-8">
           <h2 className="text-[21px] font-bold text-[#17191E]">
             {movie.tagline}
           </h2>
@@ -86,7 +86,7 @@ export function MovieDetailPage() {
         </div>
 
         {/* 평점 */}
-        <aside className="w-[390px] shrink-0 border-l border-[#E3E6EB] pl-8">
+        <aside className="w-full min-w-0 border-t border-[#E3E6EB] pt-6 xl:w-[390px] xl:shrink-0 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-8">
           <h2 className="text-[21px] font-bold text-[#17191E]">내 평점</h2>
 
           <p className="mt-1 text-xs text-[#969DA8]">

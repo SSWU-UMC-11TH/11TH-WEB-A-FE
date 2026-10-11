@@ -4,7 +4,7 @@ export default function Header() {
   return (
     <header className="h-[91px] w-full border-b border-[#E3E6EB] bg-white">
       <div className="flex h-full w-full items-center justify-between px-4 py-6 md:px-10 lg:px-20">
-        <div className="flex items-center gap-12">
+        <div className="flex min-w-0 items-center gap-4 lg:gap-12">
           <Link
             className="flex items-center gap-[10px] text-xl font-black tracking-[-0.7px] text-[#17191E] no-underline"
             to="/"
@@ -16,7 +16,7 @@ export default function Header() {
             <span>UMCine</span>
           </Link>
 
-          <nav className="flex items-center gap-[30px]">
+          <nav className="hidden items-center gap-[30px] sm:flex">
             <Link
               to="/"
               activeOptions={{ exact: true }}
@@ -55,7 +55,7 @@ export default function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-[10px]">
+        <div className="flex shrink-0 items-center gap-[10px]">
           <Link
             to="/search"
             className="flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-[#E3E6EB] bg-white p-0"
