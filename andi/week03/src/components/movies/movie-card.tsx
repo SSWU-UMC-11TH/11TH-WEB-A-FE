@@ -1,3 +1,4 @@
+
 import { Link } from "@tanstack/react-router";
 import type { Movie } from "../../types/movie";
 import BookmarkButton from "./bookmark-button";
@@ -15,11 +16,17 @@ function MovieCard({ movie }: MovieCardProps) {
           params={{ movieId: String(movie.id) }}
           className="block"
         >
-          <img
-            className="aspect-[2/3] w-full object-cover"
-            src={movie.posterPath}
-            alt={`${movie.title} 포스터`}
-          />
+          {movie.posterPath ? (
+            <img
+              className="aspect-[2/3] w-full object-cover"
+              src={movie.posterPath}
+              alt={`${movie.title} 포스터`}
+            />
+          ) : (
+            <div className="flex aspect-[2/3] items-center justify-center text-sm text-gray-500">
+              포스터 없음
+            </div>
+          )}
         </Link>
 
         <BookmarkButton movieId={movie.id} variant="card" />
