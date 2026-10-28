@@ -1,3 +1,4 @@
+// 순수 fetch 실습 기록용
 import { env } from "../config/env";
 import type { MovieListResponse } from "../types/movie";
 
