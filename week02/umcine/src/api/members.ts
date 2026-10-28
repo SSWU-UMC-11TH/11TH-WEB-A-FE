@@ -1,5 +1,5 @@
 import { backend } from "./backend";
-import type { AvailabilityResponse, PageResponse, RatingResponse } from "../types/members";
+import type { AvailabilityResponse, PageResponse, RatingResponse } from "../types/member";
 
 export function checkNickname(nickname: string) {
   return backend

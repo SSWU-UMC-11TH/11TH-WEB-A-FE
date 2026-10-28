@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getMemberRatings } from "../api/members";
-import type { RatingResponse } from "../types/members";
+import type { RatingResponse } from "../types/member";
 
 export function MyRatingsPage() {
   const [memberId, setMemberId] = useState("1");
