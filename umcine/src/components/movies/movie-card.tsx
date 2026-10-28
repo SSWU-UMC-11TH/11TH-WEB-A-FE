@@ -1,13 +1,26 @@
 import { cn } from '../../utils/cn';
 import { Link } from '@tanstack/react-router';
-import type { Movie } from '../../types/movie';
+import type { TmdbMovieListItem } from '../../api/movies/models';
+import { useBookmarkStore } from '../../stores/bookmark-store';
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: TmdbMovieListItem;
   onToggleBookmark: (id: number) => void;
 }
 
 function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
+  // Zustand에서 북마크 여부 확인
+  const isBookmarked = useBookmarkStore((state) =>
+    state.bookmarkedMovieIds.includes(movie.id),
+  );
+
+  // TMDB 포스터 이미지 주소
+  const posterUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    : '/images/no-poster.png';
+  console.log('영화 제목:', movie.title);
+  console.log('포스터 경로:', movie.poster_path);
+  console.log('최종 이미지 주소:', posterUrl);
   return (
     <article className="w-full min-w-0">
       <div className="relative h-[274px] w-full overflow-hidden rounded-lg bg-[#eee]">
@@ -18,7 +31,7 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
         >
           <img
             className="block h-full w-full object-cover"
-            src={movie.posterPath}
+            src={posterUrl}
             alt={movie.title}
           />
         </Link>
@@ -26,21 +39,21 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
         <button
           className={cn(
             'bookmark-btn absolute right-2 top-2 rounded-full p-2 text-white',
-            movie.isBookmarked ? 'bg-blue-600' : 'bg-black/60',
+            isBookmarked ? 'bg-blue-600' : 'bg-black/60',
           )}
           onClick={() => onToggleBookmark(movie.id)}
           type="button"
           aria-label={`${movie.title} 북마크`}
-          aria-pressed={movie.isBookmarked}
+          aria-pressed={isBookmarked}
         >
           <img
             className="block h-6 w-6 brightness-0 invert"
             src={
-              movie.isBookmarked
+              isBookmarked
                 ? '/icons/bookmark.svg'
                 : '/icons/bookmark-outline.svg'
             }
-            alt={movie.isBookmarked ? '북마크 취소' : '북마크 추가'}
+            alt=""
           />
         </button>
       </div>
@@ -52,7 +65,7 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
       </Link>
 
       <p className="m-0 text-xs font-normal text-[#969da8]">
-        {movie.releaseDate}
+        {movie.release_date}
       </p>
     </article>
   );

@@ -1,9 +1,9 @@
-import type { Movie } from '../../types/movie';
+import type { TmdbMovieListItem } from '../../api/movies/models';
 import MovieCard from './movie-card';
 
 interface MovieGridProps {
-  movies: Movie[];
-  onToggleBookmark: (movieId: number) => void;
+  movies: TmdbMovieListItem[];
+  onToggleBookmark: (id: number) => void;
 }
 
 function MovieGrid({ movies, onToggleBookmark }: MovieGridProps) {
