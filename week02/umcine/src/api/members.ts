@@ -1,23 +1,5 @@
 import { backend } from "./backend";
-
-export interface AvailabilityResponse {
-  available: boolean;
-}
-
-export interface RatingResponse {
-  ratingId: number;
-  movieId: number;
-  score: number;
-  comment?: string | null;
-}
-
-export interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+import type { AvailabilityResponse, PageResponse, RatingResponse } from "../types/members";
 
 export function checkNickname(nickname: string) {
   return backend

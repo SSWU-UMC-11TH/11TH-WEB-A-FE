@@ -1,8 +1,6 @@
 import { useState } from "react";
-import {
-  getMemberRatings,
-  type RatingResponse,
-} from "../api/members";
+import { getMemberRatings } from "../api/members";
+import type { RatingResponse } from "../types/members";
 
 export function MyRatingsPage() {
   const [memberId, setMemberId] = useState("1");
@@ -71,9 +69,7 @@ export function MyRatingsPage() {
           </button>
         </div>
 
-        {error && (
-          <p className="mt-4 text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
         {hasSearched && !error && (
           <section className="mt-8">
