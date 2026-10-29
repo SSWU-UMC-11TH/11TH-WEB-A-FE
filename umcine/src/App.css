@@ -12,6 +12,8 @@ body {
 .header {
   width: 1440px;
   height: 91px;
+  max-width: 1440px;
+  box-sizing: border-box;
   background-color: white;
   border-bottom: 1px solid #eee;
 }
@@ -133,6 +135,8 @@ body {
   position: relative;
 
   width: 241.6px;
+  max-width: 241.6px;
+  min-width: 0;
 
   height: 274px;
 
