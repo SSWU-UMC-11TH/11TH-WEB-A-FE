@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../styles/pagination.css";
+import { cn } from "../../utils/cn";
 
 export default function Pagination() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -7,14 +7,18 @@ export default function Pagination() {
   const pages = [1, 2, 3, 4, 5];
 
   return (
-    <nav className="pagination" aria-label="페이지 이동">
+    <nav
+      className="mt-10 flex items-center justify-center gap-2"
+      aria-label="페이지 이동"
+    >
       {pages.map((page) => (
         <button
           key={page}
           type="button"
-          className={`pagination__button ${
-            currentPage === page ? "pagination__button--active" : ""
-          }`}
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg border-0 bg-transparent p-0 text-sm font-medium text-[#969DA8]",
+            currentPage === page && "bg-[#2563eb] text-white",
+          )}
           onClick={() => setCurrentPage(page)}
         >
           {page}
