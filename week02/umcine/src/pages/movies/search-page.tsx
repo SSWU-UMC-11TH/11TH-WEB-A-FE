@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import { movies } from "../../data/movies";
+import { BookmarkButton } from "../../components/bookmark-button";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
@@ -35,7 +36,7 @@ export function SearchPage() {
     <main className="min-h-[calc(100vh-91px)] bg-[#f7f8fa]">
       {!normalizedQuery ? (
         <section className="flex flex-col items-center px-5 pt-[165px]">
-          <h1 className="mb-8 text-[46px] leading-[1.4] font-bold text-[#17191E]">
+          <h1 className="mb-8 text-center text-3xl leading-[1.4] font-bold text-[#17191E] md:text-[46px]">
             어떤 영화를 찾고 있나요?
           </h1>
 
@@ -62,8 +63,8 @@ export function SearchPage() {
           </form>
         </section>
       ) : (
-        <section className="px-20 pt-6 pb-20">
-          <h1 className="mb-[17px] text-[38px] leading-[1.4] font-bold text-[#17191E]">
+        <section className="px-4 pt-6 pb-20 md:px-10 lg:px-20">
+          <h1 className="mb-[17px] text-3xl leading-[1.4] font-bold text-[#17191E] md:text-[38px]">
             영화 검색
           </h1>
 
@@ -97,7 +98,7 @@ export function SearchPage() {
             </button>
           </form>
 
-          <div className="mt-4 flex items-center justify-between border-b border-[#E3E6EB] pb-4">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#E3E6EB] pb-4">
             <h2 className="text-[18px] font-bold text-[#17191E]">
               ‘{query}’ 검색 결과
             </h2>
@@ -112,23 +113,26 @@ export function SearchPage() {
               <p className="text-sm text-[#969DA8]">검색 결과가 없어요.</p>
             </div>
           ) : (
-            <ul className="grid grid-cols-2 gap-x-10">
+            <ul className="grid grid-cols-1 gap-x-10 lg:grid-cols-2">
               {searchResults.map((movie) => (
                 <li
                   key={movie.id}
                   className="flex min-h-[245px] gap-5 border-b border-[#E3E6EB] py-5"
                 >
-                  <Link
-                    to="/movies/$movieId"
-                    params={{ movieId: String(movie.id) }}
-                    className="shrink-0"
-                  >
-                    <img
-                      src={movie.posterPath}
-                      alt={`${movie.title} 포스터`}
-                      className="h-[190px] w-[126px] rounded-lg object-cover"
-                    />
-                  </Link>
+                  <div className="relative h-[190px] w-[126px] shrink-0">
+                    <Link
+                      to="/movies/$movieId"
+                      params={{ movieId: String(movie.id) }}
+                    >
+                      <img
+                        src={movie.posterPath}
+                        alt={`${movie.title} 포스터`}
+                        className="h-[190px] w-[126px] rounded-lg object-cover"
+                      />
+                    </Link>
+
+                    <BookmarkButton movieId={movie.id} />
+                  </div>
 
                   <div className="min-w-0 pt-1">
                     <Link
