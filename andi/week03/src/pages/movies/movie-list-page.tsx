@@ -1,12 +1,14 @@
-
 import { useEffect, useState } from "react";
 import MovieGrid from "../../components/movies/movie-grid";
+import Pagination from "../../components/movies/pagination";
 import { getMovies } from "../../api/movies/get-movies";
 import { mapMovie } from "../../api/movies/movie-mapper";
 import type { Movie } from "../../types/movie";
 
 export function MovieListPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,10 +20,11 @@ export function MovieListPage() {
         setIsLoading(true);
         setError(null);
 
-        const response = await getMovies({ page: 1 });
+        const response = await getMovies({ page: currentPage });
 
         if (isActive) {
           setMovies(response.results.map(mapMovie));
+          setTotalPages(Math.min(response.total_pages, 500));
         }
       } catch (error) {
         if (isActive) {
@@ -43,7 +46,7 @@ export function MovieListPage() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [currentPage]);
 
   return (
     <main className="min-h-[calc(100vh-64px)] bg-gray-50">
@@ -65,7 +68,14 @@ export function MovieListPage() {
             표시할 영화가 없습니다.
           </p>
         ) : (
-          <MovieGrid movies={movies} />
+          <>
+            <MovieGrid movies={movies} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
         )}
       </div>
     </main>
