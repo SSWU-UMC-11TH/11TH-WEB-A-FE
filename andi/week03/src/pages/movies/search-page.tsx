@@ -1,6 +1,9 @@
+
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { movies } from "../../data/movies";
+import { searchMovies } from "../../api/movies/search-movies";
+import { mapMovie } from "../../api/movies/movie-mapper";
+import type { Movie } from "../../types/movie";
 import BookmarkButton from "../../components/movies/bookmark-button";
 
 export function SearchPage() {
@@ -8,20 +11,61 @@ export function SearchPage() {
   const navigate = useNavigate({ from: "/search" });
 
   const [searchText, setSearchText] = useState(query ?? "");
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const normalizedQuery = query?.trim() ?? "";
 
   useEffect(() => {
     setSearchText(query ?? "");
   }, [query]);
 
-  const normalizedQuery = query?.trim().toLowerCase() ?? "";
+  useEffect(() => {
+    let isActive = true;
 
-  const searchResults = normalizedQuery
-    ? movies.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(normalizedQuery) ||
-          movie.originalTitle.toLowerCase().includes(normalizedQuery)
-      )
-    : [];
+    if (!normalizedQuery) {
+      setSearchResults([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    async function loadSearchResults() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        setSearchResults([]);
+
+        const response = await searchMovies({
+          query: normalizedQuery,
+          page: 1,
+        });
+
+        if (isActive) {
+          setSearchResults(response.results.map(mapMovie));
+        }
+      } catch (error) {
+        if (isActive) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "영화 검색에 실패했습니다.",
+          );
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadSearchResults();
+
+    return () => {
+      isActive = false;
+    };
+  }, [normalizedQuery]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,10 +79,7 @@ export function SearchPage() {
 
   function handleResetSearch() {
     setSearchText("");
-
-    navigate({
-      search: {},
-    });
+    navigate({ search: {} });
   }
 
   return (
@@ -46,7 +87,6 @@ export function SearchPage() {
       <div className="mx-auto max-w-[1280px] px-8 py-10">
         {normalizedQuery ? (
           <>
-            {/* 검색 결과 화면 */}
             <h1 className="mb-7 text-2xl font-bold text-gray-900">
               영화 검색
             </h1>
@@ -98,7 +138,19 @@ export function SearchPage() {
               </p>
             </div>
 
-            {searchResults.length === 0 ? (
+            {isLoading ? (
+              <div className="flex min-h-[360px] items-center justify-center">
+                <p className="text-gray-500">
+                  검색 중입니다...
+                </p>
+              </div>
+            ) : error ? (
+              <div className="flex min-h-[360px] items-center justify-center">
+                <p role="alert" className="text-red-500">
+                  {error}
+                </p>
+              </div>
+            ) : searchResults.length === 0 ? (
               <div className="flex min-h-[360px] items-center justify-center">
                 <p className="text-base text-gray-500">
                   검색 결과가 없어요.
@@ -116,11 +168,17 @@ export function SearchPage() {
                       params={{ movieId: String(movie.id) }}
                       className="shrink-0"
                     >
-                      <img
-                        src={movie.posterPath}
-                        alt={`${movie.title} 포스터`}
-                        className="h-44 w-28 rounded-lg object-cover"
-                      />
+                      {movie.posterPath ? (
+                        <img
+                          src={movie.posterPath}
+                          alt={`${movie.title} 포스터`}
+                          className="h-44 w-28 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-44 w-28 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
+                          포스터 없음
+                        </div>
+                      )}
                     </Link>
 
                     <div className="min-w-0 flex-1 py-1">
@@ -155,7 +213,6 @@ export function SearchPage() {
             )}
           </>
         ) : (
-          /* 검색 전 화면 */
           <div className="flex min-h-[600px] flex-col items-center justify-center">
             <h1 className="mb-10 text-2xl font-bold text-gray-900">
               어떤 영화를 찾고 있나요?
