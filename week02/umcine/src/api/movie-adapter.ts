@@ -20,7 +20,6 @@ export function toMovie(movie: TmdbMovie): Movie {
     runtime: "",
     tagline: "",
     overview: movie.overview,
-    isBookmarked: false,
   };
 }
 
