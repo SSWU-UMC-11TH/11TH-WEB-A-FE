@@ -1,17 +1,70 @@
+
 import { Link, useParams } from "@tanstack/react-router";
-import { movies } from "../../data/movies";
+import { useEffect, useState } from "react";
+import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import { mapMovieDetail } from "../../api/movies/movie-mapper";
+import type { Movie } from "../../types/movie";
 import BookmarkButton from "../../components/movies/bookmark-button";
 
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: "/movies/$movieId" });
-  const movie = movies.find((item) => item.id === Number(movieId));
 
-  if (!movie) {
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadMovieDetail() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        setMovie(null);
+
+        const response = await getMovieDetail(Number(movieId));
+
+        if (isActive) {
+          setMovie(mapMovieDetail(response));
+        }
+      } catch (error) {
+        if (isActive) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "영화 상세 정보를 불러오지 못했습니다.",
+          );
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadMovieDetail();
+
+    return () => {
+      isActive = false;
+    };
+  }, [movieId]);
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
+        <p className="text-gray-500">
+          영화 정보를 불러오는 중입니다...
+        </p>
+      </main>
+    );
+  }
+
+  if (error || !movie) {
     return (
       <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">
-            영화를 찾을 수 없어요.
+            {error ?? "영화를 찾을 수 없어요."}
           </h1>
 
           <Link
@@ -27,14 +80,15 @@ export function MovieDetailPage() {
 
   return (
     <main className="min-h-[calc(100vh-64px)] bg-gray-50">
-      {/* Backdrop */}
       <section className="relative h-[320px] overflow-hidden bg-gray-900">
-        <img
-          src={movie.backdropPath}
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full object-cover"
-        />
+        {movie.backdropPath && (
+          <img
+            src={movie.backdropPath}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover"
+          />
+        )}
 
         <div className="absolute inset-0 bg-black/35" />
 
@@ -67,22 +121,27 @@ export function MovieDetailPage() {
         </div>
       </section>
 
-      {/* 영화 상세 정보 */}
       <section className="mx-auto max-w-[1280px] px-8 py-7">
         <div className="flex gap-7">
-          <img
-            src={movie.posterPath}
-            alt={`${movie.title} 포스터`}
-            className="h-[300px] w-[200px] shrink-0 rounded-lg object-cover shadow-sm"
-          />
+          {movie.posterPath ? (
+            <img
+              src={movie.posterPath}
+              alt={`${movie.title} 포스터`}
+              className="h-[300px] w-[200px] shrink-0 rounded-lg object-cover shadow-sm"
+            />
+          ) : (
+            <div className="flex h-[300px] w-[200px] shrink-0 items-center justify-center rounded-lg bg-gray-200 text-gray-500">
+              포스터 없음
+            </div>
+          )}
 
           <div className="min-w-0 flex-1 pt-1">
             <h2 className="text-xl font-bold text-gray-900">
-              {movie.tagline}
+              {movie.tagline || movie.title}
             </h2>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-600">
-              {movie.overview}
+              {movie.overview || "줄거리 정보가 없습니다."}
             </p>
 
             <BookmarkButton
