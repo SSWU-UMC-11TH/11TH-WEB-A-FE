@@ -14,11 +14,17 @@ export default function MovieCard({ movie }: MovieCardProps) {
           to="/movies/$movieId"
           params={{ movieId: String(movie.id) }}
         >
-          <img
-            className="block h-full w-full object-cover"
-            src={movie.posterPath}
-            alt={`${movie.title} 포스터`}
-          />
+          {movie.posterPath ? (
+            <img
+              className="block h-full w-full object-cover"
+              src={movie.posterPath}
+              alt={`${movie.title} 포스터`}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[#E3E6EB] text-sm text-[#969DA8]">
+              포스터 없음
+            </div>
+          )}
         </Link>
 
         <BookmarkButton movieId={movie.id} />

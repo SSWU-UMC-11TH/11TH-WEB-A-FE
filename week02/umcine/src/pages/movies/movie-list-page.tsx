@@ -6,12 +6,29 @@ import { getPopularMovies } from "../../api/movies";
 import { toMovie } from "../../api/movie-adapter";
 import { cn } from "../../utils/cn";
 
-export function MovieListPage() {
-  const [viewMode, setViewMode] = useState<"default" | "compact">(() => {
-    const savedViewMode = localStorage.getItem("umcine-view-mode");
+const VIEW_MODE_KEY = "umcine-view-mode";
 
-    return savedViewMode === "compact" ? "compact" : "default";
-  });
+function readViewMode(): "default" | "compact" {
+  try {
+    return localStorage.getItem(VIEW_MODE_KEY) === "compact"
+      ? "compact"
+      : "default";
+  } catch {
+    console.warn("보기 설정을 읽을 수 없습니다.");
+    return "default";
+  }
+}
+
+function saveViewMode(mode: "default" | "compact") {
+  try {
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  } catch {
+    console.warn("보기 설정을 저장하지 못했습니다.");
+  }
+}
+
+export function MovieListPage() {
+  const [viewMode, setViewMode] = useState<"default" | "compact">(readViewMode);
 
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +72,7 @@ export function MovieListPage() {
 
   function handleViewModeChange(nextViewMode: "default" | "compact") {
     setViewMode(nextViewMode);
-    localStorage.setItem("umcine-view-mode", nextViewMode);
+    saveViewMode(nextViewMode);
   }
 
   return (

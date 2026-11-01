@@ -4,6 +4,7 @@ import type { RatingResponse } from "../types/member";
 
 export function MyRatingsPage() {
   const [memberId, setMemberId] = useState("1");
+  const [searchedMemberId, setSearchedMemberId] = useState<number | null>(null);
   const [ratings, setRatings] = useState<RatingResponse[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [page, setPage] = useState(0);
@@ -12,9 +13,7 @@ export function MyRatingsPage() {
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
 
-  async function loadRatings(nextPage = 0) {
-    const id = Number(memberId);
-
+  async function loadRatings(id: number, nextPage = 0) {
     if (!Number.isInteger(id) || id <= 0) {
       setError("올바른 회원 ID를 입력해 주세요.");
       return;
@@ -26,10 +25,12 @@ export function MyRatingsPage() {
 
     try {
       const response = await getMemberRatings(id, nextPage, 10);
+
       setRatings(response.content);
       setTotalElements(response.totalElements);
       setTotalPages(response.totalPages);
       setPage(response.number);
+      setSearchedMemberId(id);
       setHasSearched(true);
     } catch {
       setError("평점 목록을 불러오지 못했어요.");
@@ -62,7 +63,7 @@ export function MyRatingsPage() {
           <button
             type="button"
             disabled={isLoading}
-            onClick={() => loadRatings(0)}
+            onClick={() => loadRatings(Number(memberId), 0)}
             className="rounded-lg bg-[#2563EB] px-6 text-sm font-bold text-white disabled:opacity-50"
           >
             {isLoading ? "조회 중" : "조회"}
@@ -107,12 +108,12 @@ export function MyRatingsPage() {
               </div>
             )}
 
-            {totalPages > 1 && (
+            {totalPages > 1 && searchedMemberId !== null && (
               <div className="mt-6 flex items-center justify-center gap-4">
                 <button
                   type="button"
                   disabled={page === 0 || isLoading}
-                  onClick={() => loadRatings(page - 1)}
+                  onClick={() => loadRatings(searchedMemberId, page - 1)}
                   className="text-sm disabled:opacity-30"
                 >
                   이전
@@ -125,7 +126,7 @@ export function MyRatingsPage() {
                 <button
                   type="button"
                   disabled={page >= totalPages - 1 || isLoading}
-                  onClick={() => loadRatings(page + 1)}
+                  onClick={() => loadRatings(searchedMemberId, page + 1)}
                   className="text-sm disabled:opacity-30"
                 >
                   다음

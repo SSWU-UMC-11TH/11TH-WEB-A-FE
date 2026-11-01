@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { checkEmail, checkNickname } from "../api/members";
 
 export function SignupPage() {
@@ -10,14 +10,21 @@ export function SignupPage() {
   const [emailResult, setEmailResult] = useState("");
   const [nicknameResult, setNicknameResult] = useState("");
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
-  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
+  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(
+    null,
+  );
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [checkingNickname, setCheckingNickname] = useState(false);
+  const emailRef = useRef(email);
+  const nicknameRef = useRef(nickname);
+  emailRef.current = email;
+  nicknameRef.current = nickname;
 
   async function handleEmailCheck() {
     const value = email.trim();
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setEmailAvailable(null);
       setEmailResult("올바른 이메일을 입력해 주세요.");
       return;
     }
@@ -27,6 +34,7 @@ export function SignupPage() {
 
     try {
       const result = await checkEmail(value);
+      if (emailRef.current.trim() !== value) return;
       setEmailAvailable(result.available);
       setEmailResult(
         result.available
@@ -34,6 +42,7 @@ export function SignupPage() {
           : "이미 사용 중인 이메일입니다.",
       );
     } catch {
+      if (emailRef.current.trim() !== value) return;
       setEmailAvailable(null);
       setEmailResult("이메일 중복 확인에 실패했어요.");
     } finally {
@@ -54,6 +63,7 @@ export function SignupPage() {
 
     try {
       const result = await checkNickname(value);
+      if (nicknameRef.current.trim() !== value) return;
       setNicknameAvailable(result.available);
       setNicknameResult(
         result.available
@@ -61,6 +71,7 @@ export function SignupPage() {
           : "이미 사용 중인 닉네임입니다.",
       );
     } catch {
+      if (nicknameRef.current.trim() !== value) return;
       setNicknameAvailable(null);
       setNicknameResult("닉네임 중복 확인에 실패했어요.");
     } finally {
