@@ -1,63 +1,68 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import MovieGrid from '../../components/movies/movie-grid';
 import { useBookmarkStore } from '../../stores/bookmark-store';
 import { getMovies } from '../../api/movies/get-movies';
-import type { TmdbMovieListItem } from '../../api/movies/models';
 
 export function MovieListPage() {
-  // 1. 영화 목록 상태
-  const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // 1. 현재 페이지 상태
+  const [page, setPage] = useState(1);
 
-  // 2. 기존 4주차 북마크 기능
+  // 2. 기존 북마크 기능 유지
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
-  // 3. TMDB API 요청
-  useEffect(() => {
-    let ignore = false;
+  // 3. TanStack Query로 영화 목록 요청
+  const moviesQuery = useQuery({
+    queryKey: ['movies', 'list', { page }],
+    queryFn: () => getMovies({ page }),
+  });
 
-    async function loadMovies() {
-      setIsLoading(true);
-      setErrorMessage(null);
+  const movies = moviesQuery.data?.results ?? [];
+  const totalPages = moviesQuery.data?.total_pages ?? 0;
 
-      try {
-        const response = await getMovies({ page: 1 });
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+  };
 
-        if (!ignore) {
-          setMovies(response.results);
-        }
-      } catch {
-        if (!ignore) {
-          setErrorMessage('영화 목록을 불러오지 못했어요.');
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadMovies();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  // 4. 기존 JSX 유지 + 상태별 UI
   return (
     <main className="mx-auto w-full max-w-[1440px] flex-1 flex-col gap-5 px-20 pb-10 pt-6">
       <h1 className="text-[38px] font-bold text-[#17191e]">영화 목록</h1>
 
-      {isLoading ? (
+      {moviesQuery.isPending ? (
         <p>영화 목록을 불러오는 중이에요.</p>
-      ) : errorMessage ? (
-        <p className="text-red-500">{errorMessage}</p>
+      ) : moviesQuery.isError ? (
+        <p className="text-red-500">{moviesQuery.error.message}</p>
       ) : movies.length === 0 ? (
         <p>조건에 맞는 영화가 없어요.</p>
       ) : (
-        <MovieGrid movies={movies} onToggleBookmark={toggleBookmark} />
+        <>
+          <MovieGrid movies={movies} onToggleBookmark={toggleBookmark} />
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                이전
+              </button>
+
+              <span>
+                {page} / {totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                다음
+              </button>
+            </div>
+          )}
+        </>
       )}
     </main>
   );
