@@ -2,15 +2,46 @@ import { useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { movies } from '../../data/movies';
 import { cn } from '../../utils/cn';
+import { useBookmarkStore } from '../../stores/bookmark-store';
 
+function getSavedRating(movieId: string) {
+  try {
+    const saved = localStorage.getItem(`movie-rating-${movieId}`);
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      return {
+        rating: typeof parsed.rating === 'number' ? parsed.rating : 0,
+        review: typeof parsed.review === 'string' ? parsed.review : '',
+      };
+    }
+  } catch (error) {
+    console.error('저장된 평점과 후기를 불러오지 못했습니다.', error);
+  }
+
+  return { rating: 0, review: '' };
+}
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: '/movies/$movieId' });
+
+  return <MovieDetailContent key={movieId} movieId={movieId} />;
+}
+
+function MovieDetailContent({ movieId }: { movieId: string }) {
   const movie = movies.find((item) => item.id === Number(movieId));
-  const [isBookmarked, setIsBookmarked] = useState(
-    movie?.isBookmarked ?? false,
+
+  const bookmarkedMovieIds = useBookmarkStore(
+    (state) => state.bookmarkedMovieIds,
   );
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
+
+  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+
+  const isBookmarked = movie ? bookmarkedMovieIds.includes(movie.id) : false;
+
+  const [savedRating] = useState(() => getSavedRating(movieId));
+  const [rating, setRating] = useState(savedRating.rating);
+  const [review, setReview] = useState(savedRating.review);
 
   function handleSaveRating() {
     if (rating === 0) return;
@@ -26,7 +57,7 @@ export function MovieDetailPage() {
 
       alert('평점이 저장되었습니다!');
     } catch (error) {
-      console.error('평점 저장 실패:', error);
+      console.error('평점 저장에 실패했습니다.', error);
       alert('평점 저장에 실패했습니다. 다시 시도해주세요.');
     }
   }
@@ -97,7 +128,7 @@ export function MovieDetailPage() {
 
           <button
             type="button"
-            onClick={() => setIsBookmarked((prev) => !prev)}
+            onClick={() => toggleBookmark(movie.id)}
             aria-pressed={isBookmarked}
             className={cn(
               'mt-4 flex h-[42px] w-[107px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-white px-2 text-[14px] font-extrabold text-white',
