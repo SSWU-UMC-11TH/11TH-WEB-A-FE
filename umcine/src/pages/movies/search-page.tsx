@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { useEffect, useState, type SubmitEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies/search-movies';
-import type { TmdbMovieListItem } from '../../api/movies/models';
 import { useBookmarkStore } from '../../stores/bookmark-store';
 
 export function SearchPage() {
@@ -13,52 +13,27 @@ export function SearchPage() {
 function SearchPageContent({ query }: { query: string }) {
   const navigate = useNavigate({ from: '/search' });
 
-  const [searchText, setSearchText] = useState(query ?? '');
+  // 검색창에 입력하는 텍스트
+  const [searchText, setSearchText] = useState(query);
 
-  const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // 실제 검색에 사용할 검색어
+  const normalizedQuery = query.trim();
 
+  // 6주차: useQuery로 검색 API 호출
+  const searchQuery = useQuery({
+    queryKey: ['movies', 'search', { query: normalizedQuery }],
+    queryFn: () => searchMovies({ query: normalizedQuery }),
+    enabled: normalizedQuery.length > 0,
+  });
+
+  const searchResults = searchQuery.data?.results ?? [];
+
+  // 기존 북마크 기능 유지
   const bookmarkedMovieIds = useBookmarkStore(
     (state) => state.bookmarkedMovieIds,
   );
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
-  const normalizedQuery = (query ?? '').trim();
-
-  useEffect(() => {
-    if (!normalizedQuery) return;
-
-    let ignore = false;
-
-    Promise.resolve()
-      .then(() => {
-        if (ignore) return;
-
-        setIsLoading(true);
-        setErrorMessage(null);
-
-        return searchMovies({ query: normalizedQuery });
-      })
-      .then((response) => {
-        if (ignore || !response) return;
-        setMovies(response.results);
-      })
-      .catch((error) => {
-        if (ignore) return;
-
-        setErrorMessage('영화 검색에 실패했습니다.');
-        console.error(error);
-      })
-      .finally(() => {
-        if (ignore) return;
-        setIsLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [normalizedQuery]);
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -117,20 +92,20 @@ function SearchPageContent({ query }: { query: string }) {
             </h2>
 
             <p className="text-[12px] text-[#969DA8]">
-              영화 {movies.length}편 · 1페이지
+              영화 {searchQuery.data?.total_results ?? 0}편 · 1페이지
             </p>
           </div>
 
           {/* 로딩 / 오류 / 빈 결과 / 성공 */}
-          {isLoading ? (
+          {searchQuery.isLoading ? (
             <p className="mt-5">검색 결과를 불러오는 중이에요.</p>
-          ) : errorMessage ? (
-            <p className="mt-5 text-red-500">{errorMessage}</p>
-          ) : movies.length === 0 ? (
+          ) : searchQuery.isError ? (
+            <p className="mt-5 text-red-500">{searchQuery.error.message}</p>
+          ) : searchResults.length === 0 ? (
             <p className="mt-5">검색 결과가 없어요.</p>
           ) : (
             <ul className="mt-5 grid grid-cols-1 gap-x-[40px] gap-y-5 lg:grid-cols-2">
-              {movies.map((movie) => {
+              {searchResults.map((movie) => {
                 const isBookmarked = bookmarkedMovieIds.includes(movie.id);
 
                 const posterUrl = movie.poster_path
