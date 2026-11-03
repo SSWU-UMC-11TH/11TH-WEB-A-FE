@@ -4,8 +4,31 @@ import { movies } from '../../data/movies';
 import { cn } from '../../utils/cn';
 import { useBookmarkStore } from '../../stores/bookmark-store';
 
+function getSavedRating(movieId: string) {
+  try {
+    const saved = localStorage.getItem(`movie-rating-${movieId}`);
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      return {
+        rating: typeof parsed.rating === 'number' ? parsed.rating : 0,
+        review: typeof parsed.review === 'string' ? parsed.review : '',
+      };
+    }
+  } catch (error) {
+    console.error('저장된 평점과 후기를 불러오지 못했습니다.', error);
+  }
+
+  return { rating: 0, review: '' };
+}
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: '/movies/$movieId' });
+
+  return <MovieDetailContent key={movieId} movieId={movieId} />;
+}
+
+function MovieDetailContent({ movieId }: { movieId: string }) {
   const movie = movies.find((item) => item.id === Number(movieId));
 
   const bookmarkedMovieIds = useBookmarkStore(
@@ -15,20 +38,28 @@ export function MovieDetailPage() {
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
   const isBookmarked = movie ? bookmarkedMovieIds.includes(movie.id) : false;
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
+
+  const [savedRating] = useState(() => getSavedRating(movieId));
+  const [rating, setRating] = useState(savedRating.rating);
+  const [review, setReview] = useState(savedRating.review);
 
   function handleSaveRating() {
     if (rating === 0) return;
 
-    localStorage.setItem(
-      `movie-rating-${movieId}`,
-      JSON.stringify({
-        rating,
-        review,
-      }),
-    );
-    alert('평점이 저장되었습니다!');
+    try {
+      localStorage.setItem(
+        `movie-rating-${movieId}`,
+        JSON.stringify({
+          rating,
+          review,
+        }),
+      );
+
+      alert('평점이 저장되었습니다!');
+    } catch (error) {
+      console.error('평점 저장에 실패했습니다.', error);
+      alert('평점 저장에 실패했습니다. 다시 시도해주세요.');
+    }
   }
   if (!movie) {
     return (

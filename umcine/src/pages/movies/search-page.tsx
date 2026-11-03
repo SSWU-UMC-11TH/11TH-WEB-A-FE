@@ -5,8 +5,13 @@ import { useBookmarkStore } from '../../stores/bookmark-store';
 
 export function SearchPage() {
   const { query } = useSearch({ from: '/search' });
+
+  return <SearchPageContent key={query ?? ''} query={query ?? ''} />;
+}
+
+function SearchPageContent({ query }: { query: string }) {
   const navigate = useNavigate({ from: '/search' });
-  const [searchText, setSearchText] = useState(query ?? '');
+  const [searchText, setSearchText] = useState(query);
 
   const bookmarkedMovieIds = useBookmarkStore(
     (state) => state.bookmarkedMovieIds,
@@ -94,44 +99,49 @@ export function SearchPage() {
 
                     {/* 영화 정보 */}
                     <div className="flex min-w-0 flex-1 flex-col">
-                      <div className="flex items-center justify-between"></div>
-                      <h3 className="text-base font-bold text-[#17191E]">
-                        {movie.title}
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => toggleBookmark(movie.id)}
-                        aria-label={`${movie.title} 북마크`}
-                        aria-pressed={isBookmarked}
+                      {/* 제목과 북마크 버튼 */}
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-bold text-[#17191E]">
+                          {movie.title}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => toggleBookmark(movie.id)}
+                          aria-label={`${movie.title} 북마크`}
+                          aria-pressed={isBookmarked}
+                        >
+                          <img
+                            src={
+                              isBookmarked
+                                ? '/icons/bookmark.svg'
+                                : '/icons/bookmark-outline.svg'
+                            }
+                            alt=""
+                            className="h-5 w-5"
+                          />
+                        </button>
+                      </div>
+
+                      {/* 원제와 개봉일 */}
+                      <div className="mt-1 flex flex-wrap gap-2 text-xs text-[#969DA8]">
+                        <span>{movie.originalTitle}</span>
+                        <span>{movie.releaseDate}</span>
+                      </div>
+
+                      {/* 줄거리 */}
+                      <p className="mt-3 line-clamp-2 text-xs leading-5 text-[#606774]">
+                        {movie.overview}
+                      </p>
+
+                      {/* 상세 링크 */}
+                      <Link
+                        to="/movies/$movieId"
+                        params={{ movieId: String(movie.id) }}
+                        className="mt-3 text-xs font-bold text-[#2563EB]"
                       >
-                        <img
-                          src={
-                            isBookmarked
-                              ? '/icons/bookmark.svg'
-                              : '/icons/bookmark-outline.svg'
-                          }
-                          alt=""
-                          className="h-5 w-5"
-                        />
-                      </button>
+                        상세 보기 →
+                      </Link>
                     </div>
-
-                    <div className="mt-1 flex flex-wrap gap-2 text-xs text-[#969DA8]">
-                      <span>{movie.originalTitle}</span>
-                      <span>{movie.releaseDate}</span>
-                    </div>
-
-                    <p className="mt-3 line-clamp-2 text-xs leading-5 text-[#606774]">
-                      {movie.overview}
-                    </p>
-
-                    <Link
-                      to="/movies/$movieId"
-                      params={{ movieId: String(movie.id) }}
-                      className="mt-3 text-xs font-bold text-[#2563EB]"
-                    >
-                      상세 보기 →
-                    </Link>
                   </li>
                 );
               })}
