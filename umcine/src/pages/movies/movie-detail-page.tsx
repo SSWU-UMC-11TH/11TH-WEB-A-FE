@@ -15,19 +15,25 @@ export function MovieDetailPage() {
   function handleSaveRating() {
     if (rating === 0) return;
 
-    localStorage.setItem(
-      `movie-rating-${movieId}`,
-      JSON.stringify({
-        rating,
-        review,
-      }),
-    );
-    alert('평점이 저장되었습니다!');
+    try {
+      localStorage.setItem(
+        `movie-rating-${movieId}`,
+        JSON.stringify({
+          rating,
+          review,
+        }),
+      );
+
+      alert('평점이 저장되었습니다!');
+    } catch (error) {
+      console.error('평점 저장 실패:', error);
+      alert('평점 저장에 실패했습니다. 다시 시도해주세요.');
+    }
   }
   if (!movie) {
     return (
       <main className="mx-auto w-full max-w-[1440px] px-6 py-20 text-center">
-        <h1 className="text-2x1 font-bold">영화를 찾을 수 없어요.</h1>
+        <h1 className="text-2xl font-bold">영화를 찾을 수 없어요.</h1>
         <Link to="/" className="mt-6 inline-block text-blue-600">
           영화 목록으로 돌아가기
         </Link>
