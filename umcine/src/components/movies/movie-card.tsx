@@ -17,10 +17,8 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
   // TMDB 포스터 이미지 주소
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : '/images/no-poster.png';
-  console.log('영화 제목:', movie.title);
-  console.log('포스터 경로:', movie.poster_path);
-  console.log('최종 이미지 주소:', posterUrl);
+    : null;
+
   return (
     <article className="w-full min-w-0">
       <div className="relative h-[274px] w-full overflow-hidden rounded-lg bg-[#eee]">
@@ -29,11 +27,13 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
           params={{ movieId: String(movie.id) }}
           className="block h-full w-full"
         >
-          <img
-            className="block h-full w-full object-cover"
-            src={posterUrl}
-            alt={movie.title}
-          />
+          {posterUrl && (
+            <img
+              className="block h-full w-full object-cover"
+              src={posterUrl}
+              alt={movie.title}
+            />
+          )}
         </Link>
 
         <button

@@ -49,16 +49,19 @@ export function MovieDetailPage() {
 
   function handleSaveRating() {
     if (rating === 0) return;
+    try {
+      localStorage.setItem(
+        `movie-rating-${movieId}`,
+        JSON.stringify({
+          rating,
+          review,
+        }),
+      );
 
-    localStorage.setItem(
-      `movie-rating-${movieId}`,
-      JSON.stringify({
-        rating,
-        review,
-      }),
-    );
-
-    alert('평점이 저장되었습니다!');
+      alert('평점이 저장되었습니다!');
+    } catch {
+      alert('평점을 저장하지 못했어요, 잠시 후 다시 시도해 주세요');
+    }
   }
 
   if (isLoading) {
@@ -97,7 +100,7 @@ export function MovieDetailPage() {
 
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : '/images/no-poster.png';
+    : null;
 
   return (
     <main className="min-h-screen bg-[#f8faff]">
@@ -143,11 +146,13 @@ export function MovieDetailPage() {
       </section>
 
       <section className="mx-auto flex max-w-[1280px] flex-col gap-8 px-6 py-6 md:flex-row md:px-10">
-        <img
-          src={posterUrl}
-          alt={`${movie.title} 포스터`}
-          className="h-[286px] w-[200px] max-w-full self-start rounded-lg object-cover shadow-md"
-        />
+        {posterUrl && (
+          <img
+            src={posterUrl}
+            alt={`${movie.title} 포스터`}
+            className="h-[286px] w-[200px] max-w-full self-start rounded-lg object-cover shadow-md"
+          />
+        )}
 
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-bold text-[#17191e]">{movie.tagline}</h2>

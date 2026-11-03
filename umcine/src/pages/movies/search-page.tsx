@@ -22,36 +22,38 @@ export function SearchPage() {
   const normalizedQuery = (query ?? '').trim();
 
   useEffect(() => {
+    if (!normalizedQuery) return;
+
     let ignore = false;
 
-    if (!normalizedQuery) {
-      return;
-    }
+    Promise.resolve()
+      .then(() => {
+        if (ignore) return;
 
-    searchMovies({ query: normalizedQuery })
-      .then((response) => {
-        if (!ignore) {
-          setMovies(response.results);
-          setErrorMessage(null);
-        }
+        setIsLoading(true);
+        setErrorMessage(null);
+
+        return searchMovies({ query: normalizedQuery });
       })
-      .catch(() => {
-        if (!ignore) {
-          setMovies([]);
-          setErrorMessage('검색 결과를 불러오지 못했어요.');
-        }
+      .then((response) => {
+        if (ignore || !response) return;
+        setMovies(response.results);
+      })
+      .catch((error) => {
+        if (ignore) return;
+
+        setErrorMessage('영화 검색에 실패했습니다.');
+        console.error(error);
       })
       .finally(() => {
-        if (!ignore) {
-          setIsLoading(false);
-        }
+        if (ignore) return;
+        setIsLoading(false);
       });
 
     return () => {
       ignore = true;
     };
   }, [normalizedQuery]);
-
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -128,7 +130,7 @@ export function SearchPage() {
 
                 const posterUrl = movie.poster_path
                   ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                  : '/images/no-poster.png';
+                  : null;
 
                 return (
                   <li
@@ -136,11 +138,13 @@ export function SearchPage() {
                     className="flex min-w-0 gap-4 border-b border-[#E3E6EB] pb-5"
                   >
                     {/* 영화 포스터 */}
-                    <img
-                      src={posterUrl}
-                      alt={`${movie.title} 포스터`}
-                      className="h-[190px] w-[126px] shrink-0 rounded-lg object-cover"
-                    />
+                    {posterUrl && (
+                      <img
+                        src={posterUrl}
+                        alt={`${movie.title} 포스터`}
+                        className="h-[190px] w-[126px] shrink-0 rounded-lg object-cover"
+                      />
+                    )}
 
                     {/* 영화 정보 */}
                     <div className="flex min-w-0 flex-1 flex-col">
