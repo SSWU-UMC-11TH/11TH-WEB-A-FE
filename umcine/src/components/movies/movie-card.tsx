@@ -1,19 +1,23 @@
 import { cn } from '../../utils/cn';
 import { Link } from '@tanstack/react-router';
-import type { Movie } from '../../types/movie';
+import type { TmdbMovieListItem } from '../../api/movies/models';
 import { useBookmarkStore } from '../../stores/bookmark-store';
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: TmdbMovieListItem;
+  onToggleBookmark: (id: number) => void;
 }
 
-function MovieCard({ movie }: MovieCardProps) {
-  const bookmarkedMovieIds = useBookmarkStore(
-    (state) => state.bookmarkedMovieIds,
+function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
+  // Zustand에서 북마크 여부 확인
+  const isBookmarked = useBookmarkStore((state) =>
+    state.bookmarkedMovieIds.includes(movie.id),
   );
-  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
-  const isBookmarked = bookmarkedMovieIds.includes(movie.id);
+  // TMDB 포스터 이미지 주소
+  const posterUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    : null;
 
   return (
     <article className="w-full min-w-0">
@@ -23,11 +27,13 @@ function MovieCard({ movie }: MovieCardProps) {
           params={{ movieId: String(movie.id) }}
           className="block h-full w-full"
         >
-          <img
-            className="block h-full w-full object-cover"
-            src={movie.posterPath}
-            alt={movie.title}
-          />
+          {posterUrl && (
+            <img
+              className="block h-full w-full object-cover"
+              src={posterUrl}
+              alt={movie.title}
+            />
+          )}
         </Link>
 
         <button
@@ -35,7 +41,7 @@ function MovieCard({ movie }: MovieCardProps) {
             'bookmark-btn absolute right-2 top-2 rounded-full p-2 text-white',
             isBookmarked ? 'bg-blue-600' : 'bg-black/60',
           )}
-          onClick={() => toggleBookmark(movie.id)}
+          onClick={() => onToggleBookmark(movie.id)}
           type="button"
           aria-label={`${movie.title} 북마크`}
           aria-pressed={isBookmarked}
@@ -59,7 +65,7 @@ function MovieCard({ movie }: MovieCardProps) {
       </Link>
 
       <p className="m-0 text-xs font-normal text-[#969da8]">
-        {movie.releaseDate}
+        {movie.release_date}
       </p>
     </article>
   );
