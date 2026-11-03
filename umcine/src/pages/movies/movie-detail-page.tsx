@@ -5,6 +5,24 @@ import type { TmdbMovieDetail } from '../../api/movies/models';
 import { cn } from '../../utils/cn';
 import { useBookmarkStore } from '../../stores/bookmark-store';
 
+function getSavedRating(movieId: string) {
+  try {
+    const saved = localStorage.getItem(`movie-rating-${movieId}`);
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      return {
+        rating: typeof parsed.rating === 'number' ? parsed.rating : 0,
+        review: typeof parsed.review === 'string' ? parsed.review : '',
+      };
+    }
+  } catch (error) {
+    console.error('저장된 평점과 후기를 불러오지 못했습니다.', error);
+  }
+
+  return { rating: 0, review: '' };
+}
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: '/movies/$movieId' });
 
@@ -19,8 +37,9 @@ export function MovieDetailPage() {
 
   const isBookmarked = movie ? bookmarkedMovieIds.includes(movie.id) : false;
 
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
+  const [savedRating] = useState(() => getSavedRating(movieId));
+  const [rating, setRating] = useState(savedRating.rating);
+  const [review, setReview] = useState(savedRating.review);
 
   useEffect(() => {
     let ignore = false;

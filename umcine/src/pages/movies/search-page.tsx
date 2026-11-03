@@ -6,6 +6,11 @@ import { useBookmarkStore } from '../../stores/bookmark-store';
 
 export function SearchPage() {
   const { query } = useSearch({ from: '/search' });
+
+  return <SearchPageContent key={query ?? ''} query={query ?? ''} />;
+}
+
+function SearchPageContent({ query }: { query: string }) {
   const navigate = useNavigate({ from: '/search' });
 
   const [searchText, setSearchText] = useState(query ?? '');
