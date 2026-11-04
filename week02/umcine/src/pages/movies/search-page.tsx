@@ -1,66 +1,27 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
-import type { Movie } from "../../types/movie";
-import { searchMovies } from "../../api/movies";
+import { useQuery } from "@tanstack/react-query";
 import { toMovie } from "../../api/movie-adapter";
 import { BookmarkButton } from "../../components/bookmark-button";
+import { movieQueries } from "../../queries/movie-queries";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
   const navigate = useNavigate({ from: "/search" });
-  const [searchText, setSearchText] = useState(query ?? "");
-  const [searchResults, setSearchResults] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [totalResults, setTotalResults] = useState(0);
 
+  const [searchText, setSearchText] = useState(query ?? "");
+  
   useEffect(() => {
     setSearchText(query ?? "");
   }, [query]);
 
+  // 검색어 앞뒤 공백 제거 및 소문자 변환
   const normalizedQuery = query?.trim().toLowerCase() ?? "";
 
-  useEffect(() => {
-    let cancelled = false;
+  const searchQuery = useQuery(movieQueries.search(normalizedQuery));
 
-    async function loadSearchResults() {
-      if (!normalizedQuery) {
-        setSearchResults([]);
-        setTotalResults(0);
-        setError(null);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await searchMovies(normalizedQuery);
-
-        if (!cancelled) {
-          setSearchResults(response.results.map(toMovie));
-          setTotalResults(response.total_results);
-        }
-      } catch (error) {
-        console.error("영화 검색 실패:", error);
-
-        if (!cancelled) {
-          setError("영화 검색 중 오류가 발생했어요.");
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadSearchResults();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [normalizedQuery]);
+  const searchResults = searchQuery.data?.results.map(toMovie) ?? [];
+  const totalResults = searchQuery.data?.total_results ?? 0;
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -148,17 +109,20 @@ export function SearchPage() {
             </p>
           </div>
 
-          {isLoading ? (
+          {/* 검색 요청 상태에 따라 UI 표시 */}
+          {searchQuery.isLoading ? (
             <div className="py-20 text-center">
               <p className="text-sm text-[#969DA8]">
                 영화를 검색하는 중이에요...
               </p>
             </div>
-          ) : error ? (
+          ) : searchQuery.isError ? (
             <div className="py-20 text-center">
-              <p className="text-sm text-red-500">{error}</p>
+              <p role="alert" className="text-sm text-red-500">
+                영화 검색 중 오류가 발생했어요.
+              </p>
             </div>
-          ) : searchResults.length === 0 ? (
+          ) : searchQuery.isSuccess && searchResults.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-sm text-[#969DA8]">검색 결과가 없어요.</p>
             </div>
@@ -190,7 +154,9 @@ export function SearchPage() {
                       params={{ movieId: String(movie.id) }}
                       className="text-[#17191E] no-underline"
                     >
-                      <h3 className="text-[18px] font-bold">{movie.title}</h3>
+                      <h3 className="text-[18px] font-bold">
+                        {movie.title}
+                      </h3>
                     </Link>
 
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-[#969DA8]">
