@@ -111,6 +111,8 @@ export function MovieListPage() {
         <p>영화 목록을 불러오는 중이에요...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
+      ) : movies.length === 0 ? (
+        <p className="py-20 text-center text-gray-500">표시할 영화가 없어요.</p>
       ) : (
         <MovieGrid movies={movies} viewMode={viewMode} />
       )}
