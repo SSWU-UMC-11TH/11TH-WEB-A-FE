@@ -7,9 +7,13 @@ import { routeTree } from "./routeTree.gen";
 import "./styles/global.css";
 
 const router = createRouter({ routeTree });
-
-// TanStack Query 설정 - 서버 데이터의 캐시와 요청 상태를 관리하는 객체
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1분 동안 fresh 상태 유지
+    },
+  },
+});
 
 declare module "@tanstack/react-router" {
   interface Register {

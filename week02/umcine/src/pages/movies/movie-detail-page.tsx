@@ -1,12 +1,10 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
-
-import { getMovieDetail } from "../../api/movies";
 import { toMovieDetail } from "../../api/movie-adapter";
 import { cn } from "../../utils/cn";
 import { BookmarkButton } from "../../components/bookmark-button";
+import { movieQueries } from "../../queries/movie-queries";
 
 export function MovieDetailPage() {
   const { movieId: movieIdParam } = useParams({
@@ -16,11 +14,7 @@ export function MovieDetailPage() {
   const movieId = Number(movieIdParam);
   const isValidMovieId = Number.isInteger(movieId) && movieId > 0;
 
-  const movieDetailQuery = useQuery({
-    queryKey: ["movies", "detail", movieId],
-    queryFn: () => getMovieDetail(movieId),
-    enabled: isValidMovieId,
-  });
+  const movieDetailQuery = useQuery(movieQueries.detail(movieId));
 
   const movie = movieDetailQuery.data
     ? toMovieDetail(movieDetailQuery.data)
@@ -98,9 +92,7 @@ export function MovieDetailPage() {
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-bold">
             <span>{movie.releaseDate}</span>
 
-            {movie.genres.length > 0 && (
-              <span>{movie.genres.join(" · ")}</span>
-            )}
+            {movie.genres.length > 0 && <span>{movie.genres.join(" · ")}</span>}
 
             {movie.runtime && <span>{movie.runtime}</span>}
           </div>
@@ -139,9 +131,7 @@ export function MovieDetailPage() {
 
         {/* 평점 */}
         <aside className="w-full min-w-0 border-t border-[#E3E6EB] pt-6 xl:w-[390px] xl:shrink-0 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-8">
-          <h2 className="text-[21px] font-bold text-[#17191E]">
-            내 평점
-          </h2>
+          <h2 className="text-[21px] font-bold text-[#17191E]">내 평점</h2>
 
           <p className="mt-1 text-xs text-[#969DA8]">
             별점을 클릭하거나 선택하세요.
@@ -156,8 +146,7 @@ export function MovieDetailPage() {
                 onClick={() => setRating(star)}
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-lg border border-[#E3E6EB] bg-white text-2xl text-[#606774]",
-                  star <= rating &&
-                    "border-[#2563EB] text-[#2563EB]",
+                  star <= rating && "border-[#2563EB] text-[#2563EB]",
                 )}
               >
                 ★

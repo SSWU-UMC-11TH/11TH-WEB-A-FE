@@ -1,10 +1,9 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-
-import { searchMovies } from "../../api/movies";
 import { toMovie } from "../../api/movie-adapter";
 import { BookmarkButton } from "../../components/bookmark-button";
+import { movieQueries } from "../../queries/movie-queries";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
@@ -19,12 +18,7 @@ export function SearchPage() {
   // 검색어 앞뒤 공백 제거 및 소문자 변환
   const normalizedQuery = query?.trim().toLowerCase() ?? "";
 
-  const searchQuery = useQuery({
-    queryKey: ["movies", "search", { query: normalizedQuery }],
-    queryFn: () => searchMovies(normalizedQuery),
-    // 검색어가 있을 때만 API 요청
-    enabled: normalizedQuery.length > 0,
-  });
+  const searchQuery = useQuery(movieQueries.search(normalizedQuery));
 
   const searchResults = searchQuery.data?.results.map(toMovie) ?? [];
   const totalResults = searchQuery.data?.total_results ?? 0;

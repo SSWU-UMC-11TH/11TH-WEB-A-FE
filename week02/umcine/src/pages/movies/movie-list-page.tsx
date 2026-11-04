@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import MovieGrid from "../../components/movies/movie-grid";
 import Pagination from "../../components/movies/pagination";
-import { getPopularMovies } from "../../api/movies";
 import { toMovie } from "../../api/movie-adapter";
 import { cn } from "../../utils/cn";
+import { movieQueries } from "../../queries/movie-queries";
 
 const VIEW_MODE_KEY = "umcine-view-mode";
 
@@ -33,10 +33,7 @@ export function MovieListPage() {
   const [viewMode, setViewMode] = useState<"default" | "compact">(readViewMode);
   const [page, setPage] = useState(1);
 
-  const moviesQuery = useQuery({
-    queryKey: ["movies", "list", { page }],
-    queryFn: () => getPopularMovies(page),
-  });
+  const moviesQuery = useQuery(movieQueries.list(page));
 
   const movies = moviesQuery.data?.results.map(toMovie) ?? [];
   const totalPages = moviesQuery.data?.total_pages ?? 0;
