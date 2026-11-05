@@ -1,55 +1,49 @@
 
 import { Link, useParams } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { mapMovieDetail } from "../../api/movies/movie-mapper";
-import type { Movie } from "../../types/movie";
 import BookmarkButton from "../../components/movies/bookmark-button";
 
 export function MovieDetailPage() {
-  const { movieId } = useParams({ from: "/movies/$movieId" });
+  const { movieId: movieIdParam } = useParams({
+    from: "/movies/$movieId",
+  });
 
-  const [movie, setMovie] = useState<Movie | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const movieId = Number(movieIdParam);
+  const isValidMovieId = Number.isInteger(movieId) && movieId > 0;
 
-  useEffect(() => {
-    let isActive = true;
+  const movieDetailQuery = useQuery({
+    queryKey: ["movies", "detail", movieId],
+    queryFn: () => getMovieDetail(movieId),
+    enabled: isValidMovieId,
+    staleTime: 30 * 1000,
+  });
 
-    async function loadMovieDetail() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        setMovie(null);
+  const movie = movieDetailQuery.data
+    ? mapMovieDetail(movieDetailQuery.data)
+    : null;
 
-        const response = await getMovieDetail(Number(movieId));
+  if (!isValidMovieId) {
+    return (
+      <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            올바르지 않은 영화 번호입니다.
+          </h1>
 
-        if (isActive) {
-          setMovie(mapMovieDetail(response));
-        }
-      } catch (error) {
-        if (isActive) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : "영화 상세 정보를 불러오지 못했습니다.",
-          );
-        }
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
-    }
+          <Link
+            to="/"
+            className="mt-5 inline-block text-sm font-semibold text-blue-600"
+          >
+            영화 목록으로 돌아가기
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
-    loadMovieDetail();
-
-    return () => {
-      isActive = false;
-    };
-  }, [movieId]);
-
-  if (isLoading) {
+  if (movieDetailQuery.isPending) {
     return (
       <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
         <p className="text-gray-500">
@@ -59,12 +53,14 @@ export function MovieDetailPage() {
     );
   }
 
-  if (error || !movie) {
+  if (movieDetailQuery.isError || !movie) {
     return (
       <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">
-            {error ?? "영화를 찾을 수 없어요."}
+            {movieDetailQuery.isError
+              ? movieDetailQuery.error.message
+              : "영화를 찾을 수 없어요."}
           </h1>
 
           <Link
