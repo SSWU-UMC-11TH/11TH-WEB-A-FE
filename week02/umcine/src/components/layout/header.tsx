@@ -46,12 +46,19 @@ export default function Header() {
               검색
             </Link>
 
-            <a
+            <Link
+              to="/mypage"
               className="relative py-2 text-sm font-bold text-[#606774] no-underline"
-              href="#"
+              activeProps={{
+                style: {
+                  color: "#17191E",
+                  textDecoration: "underline",
+                },
+                "aria-current": "page",
+              }}
             >
               내 정보
-            </a>
+            </Link>
           </nav>
         </div>
 
@@ -64,12 +71,13 @@ export default function Header() {
             <img className="h-6 w-6" src="/icons/search.svg" alt="" />
           </Link>
 
-          <button
-            className="h-[42px] rounded-lg border-0 bg-[#2563EB] px-4 text-sm font-extrabold text-white"
-            type="button"
+          <Link
+            to="/login"
+            className="h-[42px] flex items-center rounded-lg border-0 bg-[#2563EB] px-4 text-sm font-extrabold text-white"
+            aria-label="로그인"
           >
             로그인
-          </button>
+          </Link>
         </div>
       </div>
     </header>
