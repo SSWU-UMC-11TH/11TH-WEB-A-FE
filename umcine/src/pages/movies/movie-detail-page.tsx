@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { getMovieDetail } from '../../api/movies/get-movie-detail';
-import type { TmdbMovieDetail } from '../../api/movies/models';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '../../utils/cn';
 import { useBookmarkStore } from '../../stores/bookmark-store';
 
@@ -26,9 +26,12 @@ function getSavedRating(movieId: string) {
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: '/movies/$movieId' });
 
-  const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const movieDetailQuery = useQuery({
+    queryKey: ['movies', 'detail', movieId],
+    queryFn: () => getMovieDetail(Number(movieId)),
+  });
+
+  const movie = movieDetailQuery.data;
 
   const bookmarkedMovieIds = useBookmarkStore(
     (state) => state.bookmarkedMovieIds,
@@ -40,31 +43,6 @@ export function MovieDetailPage() {
   const [savedRating] = useState(() => getSavedRating(movieId));
   const [rating, setRating] = useState(savedRating.rating);
   const [review, setReview] = useState(savedRating.review);
-
-  useEffect(() => {
-    let ignore = false;
-
-    getMovieDetail(Number(movieId))
-      .then((response) => {
-        if (!ignore) {
-          setMovie(response);
-        }
-      })
-      .catch(() => {
-        if (!ignore) {
-          setErrorMessage('영화 상세 정보를 불러오지 못했어요.');
-        }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [movieId]);
 
   function handleSaveRating() {
     if (rating === 0) return;
@@ -83,7 +61,7 @@ export function MovieDetailPage() {
     }
   }
 
-  if (isLoading) {
+  if (movieDetailQuery.isPending) {
     return (
       <main className="mx-auto w-full max-w-[1440px] px-6 py-20 text-center">
         <p>영화 상세 정보를 불러오는 중이에요.</p>
@@ -91,10 +69,10 @@ export function MovieDetailPage() {
     );
   }
 
-  if (errorMessage) {
+  if (movieDetailQuery.isError) {
     return (
       <main className="mx-auto w-full max-w-[1440px] px-6 py-20 text-center">
-        <p className="text-red-500">{errorMessage}</p>
+        <p className="text-red-500">{movieDetailQuery.error.message}</p>
         <Link to="/" className="mt-6 inline-block text-blue-600">
           영화 목록으로 돌아가기
         </Link>
