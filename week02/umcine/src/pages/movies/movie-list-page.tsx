@@ -1,10 +1,11 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import MovieGrid from "../../components/movies/movie-grid";
 import Pagination from "../../components/movies/pagination";
-import { useEffect, useState } from "react";
-import type { Movie } from "../../types/movie";
-import { getPopularMovies } from "../../api/movies";
 import { toMovie } from "../../api/movie-adapter";
 import { cn } from "../../utils/cn";
+import { movieQueries } from "../../queries/movie-queries";
 
 const VIEW_MODE_KEY = "umcine-view-mode";
 
@@ -28,47 +29,14 @@ function saveViewMode(mode: "default" | "compact") {
 }
 
 export function MovieListPage() {
+  // 보기모드는 localStorage로 관리
   const [viewMode, setViewMode] = useState<"default" | "compact">(readViewMode);
-
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    let cancelled = false;
+  const moviesQuery = useQuery(movieQueries.list(page));
 
-    async function loadMovies() {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await getPopularMovies(page);
-
-        if (!cancelled) {
-          setMovies(response.results.map(toMovie));
-          setTotalPages(response.total_pages);
-        }
-      } catch (error) {
-        console.error("영화 목록 조회 실패:", error);
-
-        if (!cancelled) {
-          setError("영화 목록을 불러오지 못했어요.");
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadMovies();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [page]);
+  const movies = moviesQuery.data?.results.map(toMovie) ?? [];
+  const totalPages = moviesQuery.data?.total_pages ?? 0;
 
   function handleViewModeChange(nextViewMode: "default" | "compact") {
     setViewMode(nextViewMode);
@@ -107,12 +75,16 @@ export function MovieListPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {moviesQuery.isPending ? (
         <p>영화 목록을 불러오는 중이에요...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
+      ) : moviesQuery.isError ? (
+        <p role="alert" className="text-red-500">
+          영화 목록을 불러오지 못했어요.
+        </p>
       ) : movies.length === 0 ? (
-        <p className="py-20 text-center text-gray-500">표시할 영화가 없어요.</p>
+        <p className="py-20 text-center text-gray-500">
+          표시할 영화가 없어요.
+        </p>
       ) : (
         <MovieGrid movies={movies} viewMode={viewMode} />
       )}
