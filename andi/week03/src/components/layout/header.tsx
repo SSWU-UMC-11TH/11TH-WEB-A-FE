@@ -1,3 +1,4 @@
+
 import { Link, useRouterState } from "@tanstack/react-router";
 import { cn } from "../../utils/cn";
 
@@ -8,8 +9,8 @@ export function Header() {
 
   const isMoviesActive =
     pathname === "/" || pathname.startsWith("/movies/");
-
   const isSearchActive = pathname === "/search";
+  const isMyPageActive = pathname.startsWith("/mypage");
 
   const menuClass = (isActive: boolean) =>
     cn(
@@ -34,20 +35,15 @@ export function Header() {
                 className="h-5 w-5"
               />
             </span>
-
             <span className="text-[17px] font-extrabold tracking-[-0.03em]">
               UMCine
             </span>
           </Link>
 
           <nav className="flex items-center gap-7">
-            <Link
-              to="/"
-              className={menuClass(isMoviesActive)}
-            >
+            <Link to="/" className={menuClass(isMoviesActive)}>
               영화
             </Link>
-
             <Link
               to="/search"
               search={{}}
@@ -55,10 +51,12 @@ export function Header() {
             >
               검색
             </Link>
-
-            <span className="border-b-2 border-transparent pb-1 text-sm font-medium text-gray-500">
+            <Link
+              to="/mypage"
+              className={menuClass(isMyPageActive)}
+            >
               내 정보
-            </span>
+            </Link>
           </nav>
         </div>
 
@@ -76,12 +74,12 @@ export function Header() {
             />
           </Link>
 
-          <button
-            type="button"
-            className="h-9 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white"
+          <Link
+            to="/login"
+            className="flex h-9 items-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white no-underline"
           >
             로그인
-          </button>
+          </Link>
         </div>
       </div>
     </header>
