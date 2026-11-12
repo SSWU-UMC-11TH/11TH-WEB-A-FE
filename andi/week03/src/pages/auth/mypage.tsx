@@ -1,12 +1,32 @@
-
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getMe } from "../../api/members/me";
 
 export function MyPage() {
-  // 8주차 API 연동 전까지 사용할 임시 데이터
-  const member = {
-    email: "andi@example.com",
-    nickname: "Andi",
-  };
+  const meQuery = useQuery({
+    queryKey: ["members", "me"],
+    queryFn: getMe,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  if (meQuery.isPending) {
+    return (
+      <main className="mx-auto max-w-lg px-6 py-16">
+        회원 정보를 불러오는 중...
+      </main>
+    );
+  }
+
+  if (meQuery.isError) {
+    return (
+      <main className="mx-auto max-w-lg px-6 py-16">
+        회원 정보를 불러오지 못했습니다.
+      </main>
+    );
+  }
+
+  const member = meQuery.data;
 
   return (
     <main className="mx-auto max-w-lg px-6 py-16">
