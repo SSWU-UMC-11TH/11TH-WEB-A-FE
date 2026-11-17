@@ -27,10 +27,14 @@ export function MovieListPage() {
   return (
     <main className="mx-auto w-full max-w-[1440px] flex-1 flex-col gap-5 px-20 pb-10 pt-6">
       <h1 className="text-[38px] font-bold text-[#17191e]">영화 목록</h1>
-
+      {moviesQuery.isRefetchError && (
+        <p className="text-sm text-red-500">
+          최신 영화 목록을 불러오지 못했습니다. 이전 영화 목록을 표시합니다.
+        </p>
+      )}
       {moviesQuery.isPending ? (
         <p>영화 목록을 불러오는 중이에요.</p>
-      ) : moviesQuery.isError ? (
+      ) : moviesQuery.isError && !moviesQuery.data ? (
         <p className="text-red-500">{moviesQuery.error.message}</p>
       ) : movies.length === 0 ? (
         <p>조건에 맞는 영화가 없어요.</p>

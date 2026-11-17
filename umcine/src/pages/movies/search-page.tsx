@@ -95,11 +95,15 @@ function SearchPageContent({ query }: { query: string }) {
               영화 {searchQuery.data?.total_results ?? 0}편 · 1페이지
             </p>
           </div>
-
+          {searchQuery.isRefetchError && (
+            <p className="mt-5 text-sm text-red-500">
+              검색 결과를 갱신하지 못했습니다. 이전 검색 결과를 표시합니다.
+            </p>
+          )}
           {/* 로딩 / 오류 / 빈 결과 / 성공 */}
           {searchQuery.isLoading ? (
             <p className="mt-5">검색 결과를 불러오는 중이에요.</p>
-          ) : searchQuery.isError ? (
+          ) : searchQuery.isError && !searchQuery.data ? (
             <p className="mt-5 text-red-500">{searchQuery.error.message}</p>
           ) : searchResults.length === 0 ? (
             <p className="mt-5">검색 결과가 없어요.</p>

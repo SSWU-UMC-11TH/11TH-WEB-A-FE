@@ -69,7 +69,7 @@ export function MovieDetailPage() {
     );
   }
 
-  if (movieDetailQuery.isError) {
+  if (movieDetailQuery.isError && !movie) {
     return (
       <main className="mx-auto w-full max-w-[1440px] px-6 py-20 text-center">
         <p className="text-red-500">{movieDetailQuery.error.message}</p>
@@ -101,6 +101,11 @@ export function MovieDetailPage() {
 
   return (
     <main className="min-h-screen bg-[#f8faff]">
+      {movieDetailQuery.isRefetchError && (
+        <p className="mb-4 text-sm text-red-500">
+          최신 영화 정보를 불러오지 못했습니다. 이전 영화 정보를 표시합니다.
+        </p>
+      )}
       <section className="relative h-[360px] w-full overflow-hidden bg-[#222]">
         {backdropUrl && (
           <img
