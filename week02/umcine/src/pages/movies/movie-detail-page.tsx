@@ -1,62 +1,39 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
-import type { Movie } from "../../types/movie";
-import { getMovieDetail } from "../../api/movies";
 import { toMovieDetail } from "../../api/movie-adapter";
 import { cn } from "../../utils/cn";
 import { BookmarkButton } from "../../components/bookmark-button";
+import { movieQueries } from "../../queries/movie-queries";
 
 export function MovieDetailPage() {
-  const { movieId } = useParams({ from: "/movies/$movieId" });
+  const { movieId: movieIdParam } = useParams({
+    from: "/movies/$movieId",
+  });
 
-  const [movie, setMovie] = useState<Movie | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const movieId = Number(movieIdParam);
+  const isValidMovieId = Number.isInteger(movieId) && movieId > 0;
+
+  const movieDetailQuery = useQuery(movieQueries.detail(movieId));
+
+  const movie = movieDetailQuery.data
+    ? toMovieDetail(movieDetailQuery.data)
+    : null;
 
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
+  if (!isValidMovieId) {
+    return (
+      <main className="flex min-h-[calc(100vh-91px)] items-center justify-center bg-[#f7f8fa]">
+        <p className="text-lg font-bold text-[#17191E]">
+          올바르지 않은 영화 번호예요.
+        </p>
+      </main>
+    );
+  }
 
-    async function loadMovieDetail() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        setMovie(null);
-
-        const id = Number(movieId);
-
-        if (!Number.isInteger(id) || id <= 0) {
-          throw new Error("잘못된 영화 ID입니다.");
-        }
-
-        const response = await getMovieDetail(id);
-
-        if (!cancelled) {
-          setMovie(toMovieDetail(response));
-        }
-      } catch (error) {
-        console.error("영화 상세 조회 실패:", error);
-
-        if (!cancelled) {
-          setError("영화 정보를 불러오지 못했어요.");
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadMovieDetail();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [movieId]);
-
-  if (isLoading) {
+  if (movieDetailQuery.isPending) {
     return (
       <main className="flex min-h-[calc(100vh-91px)] items-center justify-center bg-[#f7f8fa]">
         <p className="text-lg text-[#606774]">
@@ -66,11 +43,11 @@ export function MovieDetailPage() {
     );
   }
 
-  if (error || !movie) {
+  if (movieDetailQuery.isError || !movie) {
     return (
       <main className="flex min-h-[calc(100vh-91px)] items-center justify-center bg-[#f7f8fa]">
         <p className="text-lg font-bold text-[#17191E]">
-          {error ?? "영화를 찾을 수 없어요."}
+          영화 정보를 불러오지 못했어요.
         </p>
       </main>
     );
