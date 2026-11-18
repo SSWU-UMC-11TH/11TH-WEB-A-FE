@@ -2,8 +2,8 @@ import { authApi } from '../auth-api';
 
 export interface UpdateRatingRequest {
   ratingId: number;
-  rating: number;
-  review: string;
+  score: number;
+  comment: string;
 }
 
 export function updateRating({ ratingId, ...body }: UpdateRatingRequest) {

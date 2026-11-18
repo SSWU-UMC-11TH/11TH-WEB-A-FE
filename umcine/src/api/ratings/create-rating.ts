@@ -2,8 +2,8 @@ import { authApi } from '../auth-api';
 
 export interface CreateRatingRequest {
   movieId: number;
-  rating: number;
-  review: string;
+  score: number;
+  comment: string;
 }
 
 export function createRating(body: CreateRatingRequest) {

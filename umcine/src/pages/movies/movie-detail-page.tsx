@@ -48,8 +48,8 @@ export function MovieDetailPage() {
   const [ratingInput, setRating] = useState<number | null>(null);
   const [reviewInput, setReview] = useState<string | null>(null);
 
-  const rating = ratingInput ?? myRating?.rating ?? 0;
-  const review = reviewInput ?? myRating?.review ?? '';
+  const rating = ratingInput ?? myRating?.score ?? 0;
+  const review = reviewInput ?? myRating?.comment ?? '';
   const createRatingMutation = useCreateRatingMutation();
   const updateRatingMutation = useUpdateRatingMutation();
   const deleteRatingMutation = useDeleteRatingMutation();
@@ -58,6 +58,14 @@ export function MovieDetailPage() {
     createRatingMutation.isPending ||
     updateRatingMutation.isPending ||
     deleteRatingMutation.isPending;
+
+  // 확인용 코드 추가
+  console.log('회원 정보:', meQuery.data);
+  console.log('회원 ID:', memberId);
+  console.log('평점:', rating);
+  console.log('평점 조회 상태:', ratingsQuery.status);
+  console.log('평점 조회 오류:', ratingsQuery.error);
+  console.log('평점 요청 중:', isRatingPending);
   const favoriteQuery = useQuery({
     queryKey: ['favorites', 'detail', Number(movieId)],
     queryFn: () => getFavorite(Number(movieId)),
@@ -112,14 +120,14 @@ export function MovieDetailPage() {
     if (myRating) {
       updateRatingMutation.mutate({
         ratingId: myRating.ratingId,
-        rating,
-        review,
+        score: rating,
+        comment: review,
       });
     } else {
       createRatingMutation.mutate({
         movieId: Number(movieId),
-        rating,
-        review,
+        score: rating,
+        comment: review,
       });
     }
   }
