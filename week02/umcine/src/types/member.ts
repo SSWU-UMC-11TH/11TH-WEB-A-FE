@@ -33,3 +33,27 @@ export interface SignupResponse {
     nickname: string;
   };
 }
+
+export interface MemberInfo {
+  email: string;
+  nickname: string;
+  createdAt: string;
+}
+
+export interface MeResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: MemberInfo;
+}
+
+export interface UpdateMeRequest {
+  nickname: string;
+}
+
+export interface UpdateMeResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: MemberInfo;
+}

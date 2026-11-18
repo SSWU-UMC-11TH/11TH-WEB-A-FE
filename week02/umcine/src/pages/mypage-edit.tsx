@@ -1,12 +1,47 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { Link } from "@tanstack/react-router";
+import { checkNickname } from "../api/members";
+import { useMeQuery } from "../hooks/use-me-query";
+import { useUpdateMeMutation } from "../hooks/use-update-me-mutation";
 
 export function MyPageEditPage() {
-  const [nickname, setNickname] = useState("gs0428");
-  const [email] = useState("gwangsoo@cinemalab.kr");
+  const meQuery = useMeQuery();
+  const updateMeMutation = useUpdateMeMutation();
+
+  const member = meQuery.data;
+
+  const [editedNickname, setNickname] = useState<string | null>(null);
+
+  const nickname = editedNickname ?? member?.nickname ?? "";
+  const email = member?.email ?? "";
+
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [nicknameMessage, setNicknameMessage] = useState("");
+  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(
+    null,
+  );
+
+  const [checkingNickname, setCheckingNickname] = useState(false);
+  const [checkedNickname, setCheckedNickname] = useState("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const nicknameRef = useRef(nickname);
+  nicknameRef.current = nickname;
+
+  const isNicknameValid =
+    nickname.trim().length >= 2 && nickname.trim().length <= 12;
+
+  const isNicknameChanged = nickname.trim() !== member?.nickname;
+
+  const canSave =
+    Boolean(member) &&
+    isNicknameValid &&
+    isNicknameChanged &&
+    nicknameAvailable === true &&
+    checkedNickname === nickname.trim() &&
+    !checkingNickname &&
+    !updateMeMutation.isPending;
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -31,22 +66,65 @@ export function MyPageEditPage() {
     reader.readAsDataURL(file);
   }
 
-  function handleNicknameCheck() {
-    if (nickname.trim().length < 2 || nickname.trim().length > 12) {
+  async function handleNicknameCheck() {
+    const value = nickname.trim();
+
+    if (!isNicknameValid) {
       setNicknameMessage("닉네임은 2~12자로 입력해 주세요.");
       return;
     }
 
-    setNicknameMessage("중복 확인 API 연결 전입니다.");
-  }
-
-  function handleSave() {
-    if (nickname.trim().length < 2 || nickname.trim().length > 12) {
-      alert("닉네임은 2~12자로 입력해 주세요.");
+    if (value === member?.nickname) {
+      setNicknameMessage("현재 사용 중인 닉네임입니다.");
       return;
     }
 
-    alert("변경사항 저장 API는 추후 연결할 예정입니다.");
+    if (checkingNickname) return;
+
+    setCheckingNickname(true);
+    setNicknameAvailable(null);
+    setCheckedNickname("");
+    setNicknameMessage("");
+
+    try {
+      const result = await checkNickname(value);
+
+      if (nicknameRef.current.trim() !== value) return;
+
+      setNicknameAvailable(result.available);
+      setCheckedNickname(value);
+
+      setNicknameMessage(
+        result.available
+          ? "사용 가능한 닉네임입니다."
+          : "이미 사용 중인 닉네임입니다.",
+      );
+    } catch {
+      if (nicknameRef.current.trim() !== value) return;
+
+      setNicknameAvailable(null);
+      setNicknameMessage("닉네임 중복 확인에 실패했어요.");
+    } finally {
+      setCheckingNickname(false);
+    }
+  }
+
+  function handleSave() {
+    if (!canSave) return;
+
+    updateMeMutation.mutate(
+      {
+        nickname: nickname.trim(),
+      },
+      {
+        onSuccess: () => {
+          setNickname(null);
+          setNicknameMessage("");
+          setNicknameAvailable(null);
+          setCheckedNickname("");
+        },
+      },
+    );
   }
 
   return (
@@ -67,9 +145,10 @@ export function MyPageEditPage() {
           <button
             type="button"
             onClick={handleSave}
-            className="shrink-0 flex items-center justify-center rounded-lg bg-[#2563EB] px-4 py-3 text-sm font-extrabold text-white"
+            disabled={!canSave}
+            className="flex shrink-0 items-center justify-center rounded-lg bg-[#2563EB] px-4 py-3 text-sm font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            변경사항 저장
+            {updateMeMutation.isPending ? "저장 중..." : "변경사항 저장"}
           </button>
         </div>
 
@@ -91,12 +170,20 @@ export function MyPageEditPage() {
                 />
               ) : (
                 <span aria-hidden="true" className="text-3xl text-[#17191E]">
-                  <img src="/images/default-profile.png" alt="프로필 이미지" className="h-20 w-20 rounded-full object-cover" />
+                  <img
+                    src="/images/default-profile.png"
+                    alt="프로필 이미지"
+                    className="h-20 w-20 rounded-full object-cover"
+                  />
                 </span>
               )}
 
               <span className="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border border-[#E3E6EB] bg-white text-xs">
-                <img src="/icons/profile-edit.svg" alt="프로필 이미지" className="h-6 w-6 rounded-full object-cover" />
+                <img
+                  src="/icons/profile-edit.svg"
+                  alt="프로필 이미지"
+                  className="h-6 w-6 rounded-full object-cover"
+                />
               </span>
             </button>
 
@@ -131,9 +218,12 @@ export function MyPageEditPage() {
                 <input
                   id="edit-nickname"
                   value={nickname}
+                  disabled={meQuery.isLoading || updateMeMutation.isPending}
                   onChange={(e) => {
                     setNickname(e.target.value);
                     setNicknameMessage("");
+                    setNicknameAvailable(null);
+                    setCheckedNickname("");
                   }}
                   className="min-w-0 flex-1 text-sm outline-none"
                 />
@@ -141,14 +231,26 @@ export function MyPageEditPage() {
                 <button
                   type="button"
                   onClick={handleNicknameCheck}
-                  className="ml-2 shrink-0 text-xs font-extrabold text-[#2563EB]"
+                  disabled={
+                    !isNicknameValid ||
+                    !isNicknameChanged ||
+                    checkingNickname ||
+                    updateMeMutation.isPending
+                  }
+                  className="ml-2 shrink-0 text-xs font-extrabold text-[#2563EB] disabled:opacity-50"
                 >
-                  중복 확인
+                  {checkingNickname ? "확인 중..." : "중복 확인"}
                 </button>
               </div>
 
               {nicknameMessage && (
-                <p className="mt-2 text-xs text-[#969DA8]">
+                <p
+                  className={`mt-2 text-xs ${
+                    nicknameAvailable === true
+                      ? "text-green-600"
+                      : "text-red-500"
+                  }`}
+                >
                   {nicknameMessage}
                 </p>
               )}
@@ -180,13 +282,16 @@ export function MyPageEditPage() {
               <p className="text-sm font-bold text-[#D92D20]">회원 탈퇴</p>
 
               <p className="mt-1 text-[11px] font-normal text-[#D92D20]">
-                탈퇴하면 작성한 평점, 후기와 즐겨찾기가 모두 삭제되며 복구할 수 없습니다.
+                탈퇴하면 작성한 평점, 후기와 즐겨찾기가 모두 삭제되며 복구할 수
+                없습니다.
               </p>
             </div>
 
             <button
               type="button"
-              onClick={() => alert("회원 탈퇴 기능은 아직 구현되지 않았습니다.")}
+              onClick={() =>
+                alert("회원 탈퇴 기능은 아직 구현되지 않았습니다.")
+              }
               className="rounded-lg border border-[#D92D20] bg-white px-4 py-2 text-sm font-extrabold text-[#D92D20]"
             >
               회원 탈퇴
@@ -194,10 +299,7 @@ export function MyPageEditPage() {
           </div>
 
           <div className="mt-4 text-right">
-            <Link
-              to="/mypage"
-              className="text-xs text-[#606774] underline"
-            >
+            <Link to="/mypage" className="text-xs text-[#606774] underline">
               내 정보로 돌아가기
             </Link>
           </div>

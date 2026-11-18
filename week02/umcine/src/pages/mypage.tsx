@@ -1,10 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-
-const member = {
-  nickname: "gs0428",
-  email: "gwangsoo@cinemalab.kr",
-};
+import { useQueryClient } from "@tanstack/react-query";
+import { useMeQuery } from "../hooks/use-me-query";
+import { useAuthStore } from "../stores/auth-store";
 
 const favorites = [
   {
@@ -28,34 +26,70 @@ const favorites = [
 ];
 
 export function MyPage() {
+  const meQuery = useMeQuery();
+  const member = meQuery.data;
+
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const setAccessToken = useAuthStore((state) => state.setAccessToken);
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 3;
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(favorites.length / pageSize),
-  );
+  function handleLogout() {
+    setAccessToken(null);
+    queryClient.clear();
+
+    navigate({ to: "/login" });
+  }
+
+  const totalPages = Math.max(1, Math.ceil(favorites.length / pageSize));
 
   const paginatedFavorites = favorites.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
 
+  if (meQuery.isLoading) {
+  return (
+    <div className="py-20 text-center text-sm text-gray-500">
+      내 정보를 불러오는 중입니다...
+    </div>
+  );
+}
+
+if (meQuery.isError) {
+  return (
+    <div className="py-20 text-center text-sm text-red-500">
+      내 정보를 불러오지 못했습니다.
+    </div>
+  );
+}
+
   return (
     <main className="min-h-[calc(100vh-91px)] bg-[#F7F8FA] px-5 py-8 md:px-10 lg:px-20">
       <div className="mx-auto max-w-[1200px]">
         {/* 제목 */}
         <div className="mb-[28px] flex items-center justify-between">
-          <h1 className="text-[31px] font-bold text-[#17191E]">
-            내 정보
-          </h1>
+          <h1 className="text-[31px] font-bold text-[#17191E]">내 정보</h1>
 
-          <Link
-            to="/mypage/edit"
-            className="h-[42px] flex items-center justify-center rounded-lg bg-[#2563EB] px-4 py-4 text-sm font-extrabold text-white no-underline"
-          >
-            정보 수정
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="h-[42px] rounded-lg border border-[#E3E6EB] bg-white px-4 text-sm font-bold text-[#606774]"
+            >
+              로그아웃
+            </button>
+
+            <Link
+              to="/mypage/edit"
+              className="flex h-[42px] items-center justify-center rounded-lg bg-[#2563EB] px-4 text-sm font-extrabold text-white no-underline"
+            >
+              정보 수정
+            </Link>
+          </div>
         </div>
 
         {/* 기본 정보 */}
@@ -67,21 +101,25 @@ export function MyPage() {
           <div className="flex flex-wrap items-center gap-[28px] border-b border-[#E3E6EB] pb-6">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#E3E6EB]">
               <span aria-hidden="true" className="text-4xl">
-                <img src="/images/default-profile.png" alt="프로필 이미지" className="h-20 w-20 rounded-full object-cover" />
+                <img
+                  src="/images/default-profile.png"
+                  alt="프로필 이미지"
+                  className="h-20 w-20 rounded-full object-cover"
+                />
               </span>
             </div>
 
             <div className="min-w-[150px]">
               <p className="mb-1 text-[11px]  text-[#969DA8]">닉네임</p>
               <p className="text-sm font-bold text-[#17191E]">
-                {member.nickname}
+                {member?.nickname ?? "-"}
               </p>
             </div>
 
             <div className="min-w-[180px]">
               <p className="mb-1 text-xs text-[#969DA8]">이메일</p>
               <p className="text-sm font-bold text-[#17191E]">
-                {member.email}
+                {member?.email ?? "-"}
               </p>
             </div>
           </div>
