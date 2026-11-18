@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { mapMovieDetail } from "../../api/movies/movie-mapper";
 import BookmarkButton from "../../components/movies/bookmark-button";
+import { MovieRatingSection } from "../../components/movies/movie-rating-section";
 
 export function MovieDetailPage() {
   const { movieId: movieIdParam } = useParams({
@@ -11,7 +12,8 @@ export function MovieDetailPage() {
   });
 
   const movieId = Number(movieIdParam);
-  const isValidMovieId = Number.isInteger(movieId) && movieId > 0;
+  const isValidMovieId =
+    Number.isInteger(movieId) && movieId > 0;
 
   const movieDetailQuery = useQuery({
     queryKey: ["movies", "detail", movieId],
@@ -146,6 +148,8 @@ export function MovieDetailPage() {
             />
           </div>
         </div>
+
+        <MovieRatingSection movieId={movie.id} />
       </section>
     </main>
   );
