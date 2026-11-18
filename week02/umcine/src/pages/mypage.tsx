@@ -22,7 +22,7 @@ export function MyPage() {
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 3;
+  const pageSize = 18;
 
   // 내 즐겨찾기 목록 조회
   const favoritesQuery = useQuery({
