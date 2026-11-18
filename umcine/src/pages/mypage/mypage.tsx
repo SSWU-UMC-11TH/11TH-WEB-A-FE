@@ -1,29 +1,52 @@
 import { Link } from '@tanstack/react-router';
-import { getUserInfo } from '../../utils/user-storage';
-
-const favoriteMovies = [
-  {
-    id: 1,
-    title: '스파이더맨: 브랜드 뉴 데이',
-    date: '2026.07.29',
-    poster: '/images/movies/spider-man-brand-new-day.jpg',
-  },
-  {
-    id: 2,
-    title: '오디세이',
-    date: '2026.08.05',
-    poster: '/images/movies/odyssey.jpg',
-  },
-  {
-    id: 3,
-    title: '미니언즈 & 몬스터즈',
-    date: '2026.07.15',
-    poster: '/images/movies/minions-monsters.jpg',
-  },
-];
+import { useQuery, useQueries } from '@tanstack/react-query';
+import { getMe } from '../../api/members/me';
+import { useAuthStore } from '../../stores/auth-store';
+import { getFavorites } from '../../api/favorites/get-favorites';
+import { getMovieDetail } from '../../api/movies/get-movie-detail';
 
 export function MyPage() {
-  const user = getUserInfo();
+  const accessToken = useAuthStore((state) => state.accessToken);
+
+  const meQuery = useQuery({
+    queryKey: ['members', 'me'],
+    queryFn: getMe,
+    enabled: Boolean(accessToken),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+  const favoritesQuery = useQuery({
+    queryKey: ['favorites', 'list'],
+    queryFn: getFavorites,
+    enabled: Boolean(accessToken),
+    retry: false,
+  });
+
+  const favorites = favoritesQuery.data ?? [];
+  const favoriteMovieQueries = useQueries({
+    queries: favorites.map((favorite) => ({
+      queryKey: ['movies', 'detail', favorite.movieId],
+      queryFn: () => getMovieDetail(favorite.movieId),
+    })),
+  });
+
+  const favoriteMovies = favoriteMovieQueries.flatMap((query) =>
+    query.data ? [query.data] : [],
+  );
+
+  const user = meQuery.data;
+
+  if (!accessToken) {
+    return <p>로그인이 필요합니다.</p>;
+  }
+
+  if (meQuery.isLoading) {
+    return <p>회원 정보를 불러오는 중이에요.</p>;
+  }
+
+  if (!user) {
+    return <p>회원 정보를 불러오지 못했습니다.</p>;
+  }
 
   return (
     <div className="min-h-[calc(100vh-91px)] bg-[#F7F8FA]">
@@ -84,12 +107,29 @@ export function MyPage() {
           <h2 className="mb-5 text-[16px] font-bold text-[#17191E]">
             내 즐겨찾기
           </h2>
+          {favoritesQuery.isLoading && <p>즐겨찾기를 불러오는 중이에요.</p>}
 
+          {favoritesQuery.isError && (
+            <p className="text-red-500">즐겨찾기를 불러오지 못했어요.</p>
+          )}
+
+          {favoritesQuery.isSuccess && favorites.length === 0 && (
+            <p className="text-gray-500">등록된 즐겨찾기가 없어요.</p>
+          )}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
             {favoriteMovies.map((movie) => (
-              <div key={movie.id}>
+              <Link
+                key={movie.id}
+                to="/movies/$movieId"
+                params={{ movieId: String(movie.id) }}
+                className="no-underline"
+              >
                 <img
-                  src={movie.poster}
+                  src={
+                    movie.poster_path
+                      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                      : '/images/no-poster.png'
+                  }
                   alt={movie.title}
                   className="aspect-[2/3] w-full rounded-[10px] object-cover"
                 />
@@ -98,8 +138,10 @@ export function MyPage() {
                   {movie.title}
                 </p>
 
-                <p className="mt-1 text-[12px] text-[#969DA8]">{movie.date}</p>
-              </div>
+                <p className="mt-1 text-[12px] text-[#969DA8]">
+                  {movie.release_date}
+                </p>
+              </Link>
             ))}
           </div>
 
