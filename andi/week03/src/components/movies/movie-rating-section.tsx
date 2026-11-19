@@ -23,6 +23,27 @@ export function MovieRatingSection({
 
   const memberId = accessToken ? getMemberId() : null;
 
+  return (
+    <MovieRatingContent
+      key={`${memberId}:${movieId}`}
+      movieId={movieId}
+      accessToken={accessToken}
+      memberId={memberId}
+    />
+  );
+}
+
+interface MovieRatingContentProps {
+  movieId: number;
+  accessToken: string | null;
+  memberId: number | null;
+}
+
+function MovieRatingContent({
+  movieId,
+  accessToken,
+  memberId,
+}: MovieRatingContentProps) {
   const ratingsQuery = useMemberRatings(memberId);
   const createMutation = useCreateRating(movieId);
   const updateMutation = useUpdateRating();
