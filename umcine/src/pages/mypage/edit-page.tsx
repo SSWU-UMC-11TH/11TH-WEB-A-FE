@@ -1,41 +1,62 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { getUserInfo, saveUserInfo } from '../../utils/user-storage';
-
-const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+import { useQuery } from '@tanstack/react-query';
+import { getMe } from '../../api/members/me';
+import { useAuthStore } from '../../stores/auth-store';
+import { useUpdateMeMutation } from '../../hooks/use-update-me-mutation';
 
 export function EditPage() {
-  const [nickname, setNickname] = useState(() => getUserInfo().nickname);
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const accessToken = useAuthStore((state) => state.accessToken);
+
+  const meQuery = useQuery({
+    queryKey: ['members', 'me'],
+    queryFn: getMe,
+    enabled: Boolean(accessToken),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  if (!accessToken) {
+    return <p>로그인이 필요합니다.</p>;
+  }
+
+  if (meQuery.isLoading) {
+    return <p>회원 정보를 불러오는 중이에요.</p>;
+  }
+
+  if (!meQuery.data) {
+    return <p>회원 정보를 불러오지 못했습니다.</p>;
+  }
+
+  return <EditPageContent initialNickname={meQuery.data.nickname} />;
+}
+
+function EditPageContent({ initialNickname }: { initialNickname: string }) {
+  const [nickname, setNickname] = useState(initialNickname);
+
   const navigate = useNavigate();
+  const updateMeMutation = useUpdateMeMutation();
+
   const isNicknameValid =
     nickname.trim().length >= 2 && nickname.trim().length <= 12;
 
-  const isPasswordValid = password === '' || PASSWORD_REGEX.test(password);
-
-  const isPasswordConfirmValid =
-    password === '' ? passwordConfirm === '' : password === passwordConfirm;
-
-  const canSubmit =
-    isNicknameValid && isPasswordValid && isPasswordConfirmValid;
+  const canSubmit = isNicknameValid;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!canSubmit) return;
+    if (!canSubmit || updateMeMutation.isPending) return;
 
-    const currentUser = getUserInfo();
-
-    saveUserInfo({
-      ...currentUser,
-      nickname: nickname.trim(),
-    });
-
-    alert('회원정보가 수정되었습니다.');
-
-    navigate({ to: '/mypage' });
+    updateMeMutation.mutate(
+      {
+        nickname: nickname.trim(),
+      },
+      {
+        onSuccess: () => {
+          navigate({ to: '/mypage' });
+        },
+      },
+    );
   };
 
   return (
@@ -56,58 +77,17 @@ export function EditPage() {
             >
               닉네임
             </label>
+
             <input
               id="nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               className="h-[48px] w-full rounded-[8px] border border-[#D1D5DB] px-4 outline-none focus:border-[#4F6DF5]"
             />
+
             {!isNicknameValid && (
               <p className="mt-2 text-[12px] text-red-500">
                 닉네임은 2~12자로 입력해 주세요.
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-2 block text-[14px] font-semibold"
-            >
-              새 비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="변경하지 않으려면 비워 두세요"
-              className="h-[48px] w-full rounded-[8px] border border-[#D1D5DB] px-4 outline-none focus:border-[#4F6DF5]"
-            />
-            {!isPasswordValid && (
-              <p className="mt-2 text-[12px] text-red-500">
-                8자 이상, 대문자·소문자·숫자·특수문자를 포함해 주세요.
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="passwordConfirm"
-              className="mb-2 block text-[14px] font-semibold"
-            >
-              새 비밀번호 확인
-            </label>
-            <input
-              id="passwordConfirm"
-              type="password"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              className="h-[48px] w-full rounded-[8px] border border-[#D1D5DB] px-4 outline-none focus:border-[#4F6DF5]"
-            />
-            {!isPasswordConfirmValid && (
-              <p className="mt-2 text-[12px] text-red-500">
-                비밀번호가 일치하지 않습니다.
               </p>
             )}
           </div>
@@ -122,10 +102,10 @@ export function EditPage() {
 
             <button
               type="submit"
-              disabled={!canSubmit}
+              disabled={!canSubmit || updateMeMutation.isPending}
               className="h-[44px] rounded-[8px] bg-[#4F6DF5] px-6 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:bg-[#CBD5E1]"
             >
-              저장하기
+              {updateMeMutation.isPending ? '저장 중' : '저장하기'}
             </button>
           </div>
         </form>
