@@ -1,3 +1,4 @@
+
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +8,7 @@ import { useUpdateMeMutation } from "../../hooks/use-update-me-mutation";
 export function MyPageEdit() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
 
   const meQuery = useQuery({
     queryKey: ["members", "me"],
@@ -18,10 +20,10 @@ export function MyPageEdit() {
   const updateMeMutation = useUpdateMeMutation();
 
   useEffect(() => {
-    if (meQuery.data) {
+    if (meQuery.data && !isDirty) {
       setNickname(meQuery.data.nickname);
     }
-  }, [meQuery.data]);
+  }, [meQuery.data, isDirty]);
 
   const trimmedNickname = nickname.trim();
   const canSubmit =
@@ -96,7 +98,10 @@ export function MyPageEdit() {
             id="edit-nickname"
             type="text"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              setIsDirty(true);
+              setNickname(e.target.value);
+            }}
             minLength={2}
             maxLength={12}
             className="w-full rounded-lg border border-gray-300 p-3"
