@@ -21,9 +21,16 @@ function Header() {
 
             <span className="cursor-default text-[14px] text-[#333]">리뷰</span>
 
-            <span className="cursor-default text-[14px] text-[#333]">
+            <Link
+              to="/mypage"
+              className="text-[14px] text-[#333] no-underline"
+              activeProps={{
+                className:
+                  'font-bold underline underline-offset-[5px] decoration-2',
+              }}
+            >
               내 정보
-            </span>
+            </Link>
           </nav>
         </div>
 
@@ -36,12 +43,12 @@ function Header() {
             <img src="/icons/search.svg" alt="" className="h-[20px] w-[20px]" />
           </Link>
 
-          <button
-            className="h-[40px] cursor-pointer rounded-[8px] bg-[#4f6df5] px-[18px] text-[14px] text-white"
-            type="button"
+          <Link
+            to="/login"
+            className="flex h-[40px] items-center justify-center rounded-[8px] bg-[#4f6df5] px-[18px] text-[14px] text-white no-underline hover:bg-[#405de0]"
           >
             로그인
-          </button>
+          </Link>
         </div>
       </div>
     </header>
