@@ -11,8 +11,9 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: login,
     onSuccess: (response) => {
+      queryClient.clear();
       setAccessToken(response.result.accessToken);
-      queryClient.invalidateQueries({ queryKey: ["members", "me"] });
+
       alert("로그인에 성공했어요.");
       navigate({ to: "/" });
     },

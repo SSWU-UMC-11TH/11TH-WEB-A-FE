@@ -13,8 +13,16 @@ export const authApi = apiClient.extend({
       },
     ],
     afterResponse: [
-      ({ response }) => {
-        if (response.status === 401) {
+      ({ request, response }) => {
+        if (response.status !== 401) return;
+
+        const requestToken = request.headers.get("Authorization");
+        const currentToken = useAuthStore.getState().accessToken;
+
+        if (
+          currentToken &&
+          requestToken === `Bearer ${currentToken}`
+        ) {
           useAuthStore.getState().setAccessToken(null);
         }
       },
