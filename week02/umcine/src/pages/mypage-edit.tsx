@@ -127,6 +127,37 @@ export function MyPageEditPage() {
     );
   }
 
+  if (meQuery.isPending) {
+    return (
+      <div className="py-20 text-center text-sm text-gray-500">
+        내 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (meQuery.isError || !member) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-sm text-red-500">내 정보를 불러오지 못했습니다.</p>
+
+        <button
+          type="button"
+          onClick={() => meQuery.refetch()}
+          disabled={meQuery.isFetching}
+          className="mt-4 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+        >
+          {meQuery.isFetching ? "불러오는 중..." : "다시 시도"}
+        </button>
+
+        <div className="mt-4">
+          <Link to="/mypage" className="text-xs text-[#606774] underline">
+            내 정보로 돌아가기
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-[calc(100vh-91px)] bg-[#F7F8FA] px-5 py-8 md:px-10 lg:px-20">
       <div className="mx-auto flex min-h-[calc(100vh-160px)] max-w-[1200px] flex-col">
@@ -244,15 +275,7 @@ export function MyPageEditPage() {
               </div>
 
               {nicknameMessage && (
-                <p
-                  className={`mt-2 text-xs ${
-                    nicknameAvailable === true
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  {nicknameMessage}
-                </p>
+                <p className="mt-2 text-xs text-[#969DA8]">{nicknameMessage}</p>
               )}
             </div>
 

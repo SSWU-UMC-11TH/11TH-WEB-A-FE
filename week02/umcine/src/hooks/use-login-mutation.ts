@@ -11,6 +11,7 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: login,
     onSuccess: (response) => {
+      queryClient.clear();
       setAccessToken(response.result.accessToken);
 
       alert("로그인에 성공했어요.");
