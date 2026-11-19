@@ -7,7 +7,12 @@ export function useUpdateMeMutation() {
 
   return useMutation({
     mutationFn: updateMe,
-    onSuccess: (response) => {
+
+    onSuccess: async (response) => {
+      await queryClient.cancelQueries({
+        queryKey: ["members", "me"],
+      });
+
       queryClient.setQueryData<MemberInfo>(
         ["members", "me"],
         response.result,
@@ -15,6 +20,7 @@ export function useUpdateMeMutation() {
 
       alert(response.message);
     },
+
     onError: () => {
       alert("정보 수정에 실패했어요. 닉네임을 확인해 주세요.");
     },

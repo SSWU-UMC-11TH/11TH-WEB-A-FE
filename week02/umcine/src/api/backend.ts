@@ -1,5 +1,6 @@
 import ky from "ky";
 import { env } from "../config/env";
+import { useAuthStore } from "../stores/auth-store";
 
 let client: ReturnType<typeof ky.create> | undefined;
 
@@ -11,5 +12,35 @@ export function getBackend() {
   return (client ??= ky.create({
     prefix: `${env.backendApiBaseUrl.replace(/\/$/, "")}/`,
     timeout: 10000,
+    hooks: {
+      beforeRequest: [
+        ({ request }) => {
+          const { accessToken } = useAuthStore.getState();
+
+          if (accessToken) {
+            request.headers.set(
+              "Authorization",
+              `Bearer ${accessToken}`
+            );
+          }
+        },
+      ],
+      afterResponse: [
+        ({ request, response }) => {
+          if (response.status !== 401) return;
+
+          const { accessToken, setAccessToken } =
+            useAuthStore.getState();
+
+          if (
+            accessToken &&
+            request.headers.get("Authorization") ===
+              `Bearer ${accessToken}`
+          ) {
+            setAccessToken(null);
+          }
+        },
+      ],
+    },
   }));
 }

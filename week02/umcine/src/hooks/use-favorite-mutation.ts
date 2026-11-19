@@ -14,9 +14,14 @@ export function useCreateFavoriteMutation() {
   return useMutation({
     mutationFn: createFavorite,
 
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables) => {
+      const queryKey =
+        favoriteQueries.status(variables.movieId).queryKey;
+
+      await queryClient.cancelQueries({ queryKey });
+
       queryClient.setQueryData(
-        favoriteQueries.status(variables.movieId).queryKey,
+        queryKey,
         { isFavorite: true },
       );
 
@@ -37,9 +42,14 @@ export function useDeleteFavoriteMutation() {
   return useMutation({
     mutationFn: deleteFavorite,
 
-    onSuccess: (_, movieId) => {
+    onSuccess: async (_, movieId) => {
+      const queryKey =
+        favoriteQueries.status(movieId).queryKey;
+
+      await queryClient.cancelQueries({ queryKey });
+
       queryClient.setQueryData(
-        favoriteQueries.status(movieId).queryKey,
+        queryKey,
         { isFavorite: false },
       );
 
