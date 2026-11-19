@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { mapMovieDetail } from "../../api/movies/movie-mapper";
 import BookmarkButton from "../../components/movies/bookmark-button";
+import { MovieRatingSection } from "../../components/movies/movie-rating-section";
 
 export function MovieDetailPage() {
   const { movieId: movieIdParam } = useParams({
@@ -11,7 +12,8 @@ export function MovieDetailPage() {
   });
 
   const movieId = Number(movieIdParam);
-  const isValidMovieId = Number.isInteger(movieId) && movieId > 0;
+  const isValidMovieId =
+    Number.isInteger(movieId) && movieId > 0;
 
   const movieDetailQuery = useQuery({
     queryKey: ["movies", "detail", movieId],
@@ -53,7 +55,7 @@ export function MovieDetailPage() {
     );
   }
 
-  if (movieDetailQuery.isError || !movie) {
+  if (!movie) {
     return (
       <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -76,6 +78,16 @@ export function MovieDetailPage() {
 
   return (
     <main className="min-h-[calc(100vh-64px)] bg-gray-50">
+      {movieDetailQuery.isError && (
+        <div
+          role="alert"
+          className="border-b border-amber-200 bg-amber-50 px-8 py-3 text-center text-sm text-amber-800"
+        >
+          최신 영화 정보를 불러오지 못했습니다.
+          기존에 불러온 정보를 표시합니다.
+        </div>
+      )}
+
       <section className="relative h-[320px] overflow-hidden bg-gray-900">
         {movie.backdropPath && (
           <img
@@ -146,6 +158,8 @@ export function MovieDetailPage() {
             />
           </div>
         </div>
+
+        <MovieRatingSection movieId={movie.id} />
       </section>
     </main>
   );
