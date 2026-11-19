@@ -1,3 +1,4 @@
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../stores/auth-store";
 import {
@@ -42,6 +43,11 @@ export function useFavoriteMutation(movieId: number) {
     },
 
     onSuccess: async (_, wasFavorite) => {
+      await queryClient.cancelQueries({
+        queryKey: ["favorites", movieId],
+        exact: true,
+      });
+
       queryClient.setQueryData(
         ["favorites", movieId],
         !wasFavorite,
