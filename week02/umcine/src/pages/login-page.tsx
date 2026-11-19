@@ -1,12 +1,27 @@
 import { useState, type SubmitEvent } from "react";
 import { Link } from "@tanstack/react-router";
+import { useLoginMutation } from "../hooks/use-login-mutation";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const loginMutation = useLoginMutation();
+
+  const canSubmit =
+    EMAIL_REGEX.test(email.trim()) && password.length > 0;
+
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!canSubmit || loginMutation.isPending) return;
+
+    loginMutation.mutate({
+      email: email.trim(),
+      password,
+    });
   }
 
   return (
@@ -26,12 +41,15 @@ export function LoginPage() {
             </label>
 
             <div className="flex h-12 items-center rounded-lg border border-[#E3E6EB] bg-white px-[13px]">
-              <img src="/icons/login-mail.svg" alt="" className="mr-2 h-4 w-4" />
+              <img
+                src="/icons/login-mail.svg"
+                alt=""
+                className="mr-2 h-4 w-4"
+              />
               <span
                 aria-hidden="true"
                 className="mr-2 text-sm text-[#969DA8]"
-              >
-              </span>
+              />
 
               <input
                 id="login-email"
@@ -54,12 +72,15 @@ export function LoginPage() {
             </label>
 
             <div className="flex h-12 items-center rounded-lg border border-[#E3E6EB] bg-white px-[13px]">
-              <img src="/icons/login-lock.svg" alt="" className="mr-2 h-4 w-4" />
+              <img
+                src="/icons/login-lock.svg"
+                alt=""
+                className="mr-2 h-4 w-4"
+              />
               <span
                 aria-hidden="true"
                 className="mr-2 text-sm text-[#969DA8]"
-              >
-              </span>
+              />
 
               <input
                 id="login-password"
@@ -75,10 +96,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={!email.trim() || !password}
+            disabled={!canSubmit || loginMutation.isPending}
             className="h-12 w-full rounded-lg bg-[#2563EB] text-sm font-extrabold text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            로그인
+            {loginMutation.isPending ? "로그인 중..." : "로그인"}
           </button>
         </form>
 

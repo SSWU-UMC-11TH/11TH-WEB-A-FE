@@ -1,6 +1,7 @@
 import { useRef, useState, type SubmitEvent } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { checkEmail, checkNickname, signup } from "../api/members";
+import { Link } from "@tanstack/react-router";
+import { checkEmail, checkNickname } from "../api/members";
+import { useSignupMutation } from "../hooks/use-signup-mutation";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -8,8 +9,6 @@ const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
 export function SignupPage() {
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +25,8 @@ export function SignupPage() {
   const [checkedNickname, setCheckedNickname] = useState("");
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [checkingNickname, setCheckingNickname] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const signupMutation = useSignupMutation();
   const emailRef = useRef(email);
   const nicknameRef = useRef(nickname);
   emailRef.current = email;
@@ -126,31 +125,17 @@ export function SignupPage() {
   }
 
   // 회원가입 요청
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!canSubmit || isSubmitting) return;
+    if (!canSubmit || signupMutation.isPending) return;
 
-    setIsSubmitting(true);
-
-    try {
-      const response = await signup({
-        email: email.trim(),
-        nickname: nickname.trim(),
-        password,
-      });
-
-      alert(response.message || "회원가입이 완료되었습니다.");
-
-      // 회원가입 성공 후 로그인 페이지 이동
-      await navigate({ to: "/login" });
-    } catch (error) {
-      console.error("회원가입 실패:", error);
-      alert("회원가입에 실패했어요. 다시 시도해 주세요.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+    signupMutation.mutate({
+      email: email.trim(),
+      nickname: nickname.trim(),
+      password: password,
+    });
+  };
 
   return (
     <main className="flex min-h-[calc(100vh-91px)] items-center justify-center bg-[#F7F8FA] px-5">
@@ -183,7 +168,7 @@ export function SignupPage() {
               />
               <button
                 type="button"
-                disabled={!isEmailValid || checkingEmail || isSubmitting}
+                disabled={!isEmailValid || checkingEmail || signupMutation.isPending}
                 onClick={handleEmailCheck}
                 className="ml-2 shrink-0 text-xs font-bold text-[#2563EB] disabled:opacity-50"
               >
@@ -233,7 +218,7 @@ export function SignupPage() {
               />
               <button
                 type="button"
-                disabled={!isNicknameValid || checkingNickname || isSubmitting}
+                disabled={!isNicknameValid || checkingNickname || signupMutation.isPending}
                 onClick={handleNicknameCheck}
                 className="ml-2 shrink-0 text-xs font-bold text-[#2563EB] disabled:opacity-50"
               >
@@ -316,10 +301,10 @@ export function SignupPage() {
           {/* 회원가입 버튼 */}
           <button
             type="submit"
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || signupMutation.isPending}
             className="h-12 w-full rounded-lg bg-[#2563EB] font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "가입 중..." : "가입하기"}
+            {signupMutation.isPending ? "가입 중..." : "가입하기"}
           </button>
 
           <p className="text-center text-[13px] text-[#606774]">

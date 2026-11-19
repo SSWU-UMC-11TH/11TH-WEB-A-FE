@@ -1,3 +1,4 @@
+// 서버 상태로 관리해서 zustand 별도 관리 필요 X
 import { create } from "zustand";
 import {
   createJSONStorage,

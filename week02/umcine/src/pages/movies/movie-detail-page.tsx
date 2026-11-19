@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { toMovieDetail } from "../../api/movie-adapter";
-import { cn } from "../../utils/cn";
 import { BookmarkButton } from "../../components/bookmark-button";
 import { movieQueries } from "../../queries/movie-queries";
+import { RatingForm } from "../../components/rating-form";
 
 export function MovieDetailPage() {
   const { movieId: movieIdParam } = useParams({
@@ -19,9 +18,6 @@ export function MovieDetailPage() {
   const movie = movieDetailQuery.data
     ? toMovieDetail(movieDetailQuery.data)
     : null;
-
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState("");
 
   if (!isValidMovieId) {
     return (
@@ -130,49 +126,7 @@ export function MovieDetailPage() {
         </div>
 
         {/* 평점 */}
-        <aside className="w-full min-w-0 border-t border-[#E3E6EB] pt-6 xl:w-[390px] xl:shrink-0 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-8">
-          <h2 className="text-[21px] font-bold text-[#17191E]">내 평점</h2>
-
-          <p className="mt-1 text-xs text-[#969DA8]">
-            별점을 클릭하거나 선택하세요.
-          </p>
-
-          <div className="mt-3 flex gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                aria-label={`${star}점`}
-                onClick={() => setRating(star)}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-lg border border-[#E3E6EB] bg-white text-2xl text-[#606774]",
-                  star <= rating && "border-[#2563EB] text-[#2563EB]",
-                )}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-
-          <textarea
-            value={review}
-            onChange={(event) => setReview(event.target.value)}
-            placeholder="영화를 보고 느낀 점을 남겨보세요."
-            className="mt-3 h-[105px] w-full resize-none rounded-lg border border-[#E3E6EB] bg-white p-4 text-sm outline-none placeholder:text-[#969DA8]"
-          />
-
-          <button
-            type="button"
-            disabled
-            className="mt-3 h-[42px] w-full cursor-not-allowed rounded-lg bg-[#17191E] text-sm font-bold text-white opacity-50"
-          >
-            평점 저장 (준비 중)
-          </button>
-
-          <p className="mt-2 text-xs text-[#969DA8]">
-            평점 저장 기능은 아직 연결되지 않았어요.
-          </p>
-        </aside>
+        <RatingForm key={movie.id} movieId={movie.id} />
       </section>
     </main>
   );

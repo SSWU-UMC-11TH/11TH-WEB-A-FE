@@ -1,6 +1,11 @@
 import { Link } from "@tanstack/react-router";
+import { useMeQuery } from "../../hooks/use-me-query";
+import { useAuthStore } from "../../stores/auth-store";
 
 export default function Header() {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const meQuery = useMeQuery();;
+
   return (
     <header className="h-[91px] w-full border-b border-[#E3E6EB] bg-white">
       <div className="flex h-full w-full items-center justify-between px-4 py-6 md:px-10 lg:px-20">
@@ -71,13 +76,25 @@ export default function Header() {
             <img className="h-6 w-6" src="/icons/search.svg" alt="" />
           </Link>
 
-          <Link
-            to="/login"
-            className="h-[42px] flex items-center rounded-lg border-0 bg-[#2563EB] px-4 text-sm font-extrabold text-white"
-            aria-label="로그인"
-          >
-            로그인
-          </Link>
+          {!accessToken ? (
+            <Link
+              to="/login"
+              className="h-[42px] flex items-center rounded-lg border-0 bg-[#2563EB] px-4 text-sm font-extrabold text-white"
+              aria-label="로그인"
+            >
+              로그인
+            </Link>
+          ) : meQuery.isLoading ? (
+            <span className="h-[42px] w-24 animate-pulse rounded-lg bg-gray-200" />
+          ) : (
+            <Link
+              to="/mypage"
+              className="h-[42px] flex items-center rounded-lg border-0 bg-[#2563EB] px-4 text-sm font-extrabold text-white"
+              aria-label="마이페이지"
+            >
+              마이페이지
+            </Link>
+          )}
         </div>
       </div>
     </header>
