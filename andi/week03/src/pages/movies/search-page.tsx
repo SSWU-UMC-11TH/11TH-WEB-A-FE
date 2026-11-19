@@ -1,9 +1,9 @@
 
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { searchMovies } from "../../api/movies/search-movies";
 import { mapMovie } from "../../api/movies/movie-mapper";
-import type { Movie } from "../../types/movie";
 import BookmarkButton from "../../components/movies/bookmark-button";
 
 export function SearchPage() {
@@ -11,9 +11,6 @@ export function SearchPage() {
   const navigate = useNavigate({ from: "/search" });
 
   const [searchText, setSearchText] = useState(query ?? "");
-  const [searchResults, setSearchResults] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const normalizedQuery = query?.trim() ?? "";
 
@@ -21,51 +18,17 @@ export function SearchPage() {
     setSearchText(query ?? "");
   }, [query]);
 
-  useEffect(() => {
-    let isActive = true;
+  const searchQuery = useQuery({
+    queryKey: ["movies", "search", { query: normalizedQuery }],
+    queryFn: () =>
+      searchMovies({
+        query: normalizedQuery,
+        page: 1,
+      }),
+    enabled: normalizedQuery.length > 0,
+  });
 
-    if (!normalizedQuery) {
-      setSearchResults([]);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
-    async function loadSearchResults() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        setSearchResults([]);
-
-        const response = await searchMovies({
-          query: normalizedQuery,
-          page: 1,
-        });
-
-        if (isActive) {
-          setSearchResults(response.results.map(mapMovie));
-        }
-      } catch (error) {
-        if (isActive) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : "영화 검색에 실패했습니다.",
-          );
-        }
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadSearchResults();
-
-    return () => {
-      isActive = false;
-    };
-  }, [normalizedQuery]);
+  const searchResults = searchQuery.data?.results.map(mapMovie) ?? [];
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -138,16 +101,16 @@ export function SearchPage() {
               </p>
             </div>
 
-            {isLoading ? (
+            {searchQuery.isLoading ? (
               <div className="flex min-h-[360px] items-center justify-center">
                 <p className="text-gray-500">
                   검색 중입니다...
                 </p>
               </div>
-            ) : error ? (
+            ) : searchQuery.isError ? (
               <div className="flex min-h-[360px] items-center justify-center">
                 <p role="alert" className="text-red-500">
-                  {error}
+                  {searchQuery.error.message}
                 </p>
               </div>
             ) : searchResults.length === 0 ? (
