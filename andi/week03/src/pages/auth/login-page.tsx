@@ -1,12 +1,24 @@
-
 import { useState, type FormEvent } from "react";
+import { useLoginMutation } from "../../hooks/use-login-mutation";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const loginMutation = useLoginMutation();
+
+  const canSubmit = EMAIL_REGEX.test(email.trim()) && password.length > 0;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!canSubmit || loginMutation.isPending) return;
+
+    loginMutation.mutate({
+      email: email.trim(),
+      password,
+    });
   };
 
   return (
@@ -48,10 +60,10 @@ export function LoginPage() {
 
         <button
           type="submit"
-          disabled={!email.trim() || !password}
+          disabled={!canSubmit || loginMutation.isPending}
           className="w-full rounded-lg bg-blue-600 p-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
         >
-          로그인
+          {loginMutation.isPending ? "로그인 중" : "로그인"}
         </button>
       </form>
     </main>

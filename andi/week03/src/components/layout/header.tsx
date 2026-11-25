@@ -1,8 +1,15 @@
-
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "../../stores/auth-store";
 import { cn } from "../../utils/cn";
 
 export function Header() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const setAccessToken = useAuthStore((state) => state.setAccessToken);
+
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
@@ -19,6 +26,13 @@ export function Header() {
         ? "border-gray-900 font-semibold text-gray-900"
         : "border-transparent font-medium text-gray-500"
     );
+
+  const handleLogout = async () => {
+    setAccessToken(null);
+    queryClient.clear();
+
+    await navigate({ to: "/" });
+  };
 
   return (
     <header className="border-b border-gray-200 bg-white">
@@ -74,12 +88,22 @@ export function Header() {
             />
           </Link>
 
-          <Link
-            to="/login"
-            className="flex h-9 items-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white no-underline"
-          >
-            로그인
-          </Link>
+          {accessToken ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex h-9 items-center rounded-md border border-gray-200 px-4 text-sm font-semibold text-gray-700"
+            >
+              로그아웃
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="flex h-9 items-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white no-underline"
+            >
+              로그인
+            </Link>
+          )}
         </div>
       </div>
     </header>

@@ -1,19 +1,65 @@
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getMe } from "../../api/members/me";
+import { useUpdateMeMutation } from "../../hooks/use-update-me-mutation";
 
 export function MyPageEdit() {
   const navigate = useNavigate();
+  const [nickname, setNickname] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
 
-  const [nickname, setNickname] = useState("Andi");
-  const [email, setEmail] = useState("andi@example.com");
+  const meQuery = useQuery({
+    queryKey: ["members", "me"],
+    queryFn: getMe,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  const updateMeMutation = useUpdateMeMutation();
+
+  useEffect(() => {
+    if (meQuery.data && !isDirty) {
+      setNickname(meQuery.data.nickname);
+    }
+  }, [meQuery.data, isDirty]);
+
+  const trimmedNickname = nickname.trim();
+  const canSubmit =
+    trimmedNickname.length >= 2 &&
+    trimmedNickname.length <= 12;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    alert("입력한 정보가 확인되었습니다.");
-    // 실제 정보 저장은 8주차 API 연동 시 구현
+    if (!canSubmit || updateMeMutation.isPending) return;
+
+    updateMeMutation.mutate(
+      { nickname: trimmedNickname },
+      {
+        onSuccess: () => {
+          navigate({ to: "/mypage" });
+        },
+      },
+    );
   };
+
+  if (meQuery.isPending) {
+    return (
+      <main className="mx-auto max-w-lg px-6 py-16">
+        회원 정보를 불러오는 중...
+      </main>
+    );
+  }
+
+  if (meQuery.isError) {
+    return (
+      <main className="mx-auto max-w-lg px-6 py-16">
+        회원 정보를 불러오지 못했습니다.
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-lg px-6 py-16">
@@ -35,10 +81,9 @@ export function MyPageEdit() {
           <input
             id="edit-email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 p-3"
-            required
+            value={meQuery.data.email}
+            readOnly
+            className="w-full rounded-lg border border-gray-300 bg-gray-100 p-3 text-gray-500"
           />
         </div>
 
@@ -53,7 +98,12 @@ export function MyPageEdit() {
             id="edit-nickname"
             type="text"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              setIsDirty(true);
+              setNickname(e.target.value);
+            }}
+            minLength={2}
+            maxLength={12}
             className="w-full rounded-lg border border-gray-300 p-3"
             required
           />
@@ -69,10 +119,10 @@ export function MyPageEdit() {
           </button>
           <button
             type="submit"
-            disabled={!email.trim() || !nickname.trim()}
+            disabled={!canSubmit || updateMeMutation.isPending}
             className="flex-1 rounded-lg bg-blue-600 p-3 font-semibold text-white disabled:bg-gray-300"
           >
-            수정 완료
+            {updateMeMutation.isPending ? "저장 중" : "수정 완료"}
           </button>
         </div>
       </form>

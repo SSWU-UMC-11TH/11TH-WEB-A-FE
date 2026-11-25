@@ -1,4 +1,10 @@
-import { useBookmarkStore } from "../../stores/bookmark-store";
+
+import { useNavigate } from "@tanstack/react-router";
+import { useAuthStore } from "../../stores/auth-store";
+import {
+  useFavoriteMutation,
+  useFavoriteStatus,
+} from "../../hooks/use-favorites";
 import { cn } from "../../utils/cn";
 
 interface BookmarkButtonProps {
@@ -12,13 +18,15 @@ function BookmarkButton({
   variant = "card",
   className,
 }: BookmarkButtonProps) {
-  const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(movieId)
-  );
+  const navigate = useNavigate();
+  const accessToken = useAuthStore((state) => state.accessToken);
 
-  const toggleBookmark = useBookmarkStore(
-    (state) => state.toggleBookmark
-  );
+  const favoriteQuery = useFavoriteStatus(movieId);
+  const favoriteMutation = useFavoriteMutation(movieId);
+
+  const isBookmarked = accessToken
+    ? (favoriteQuery.data ?? false)
+    : false;
 
   const label = isBookmarked ? "북마크 해제" : "북마크 추가";
 
@@ -32,13 +40,40 @@ function BookmarkButton({
       "mt-6 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white",
   };
 
+  const handleClick = () => {
+    if (!accessToken) {
+      navigate({ to: "/login" });
+      return;
+    }
+
+    if (
+      favoriteQuery.isPending ||
+      favoriteQuery.isError ||
+      favoriteMutation.isPending
+    ) {
+      return;
+    }
+
+    favoriteMutation.mutate(isBookmarked);
+  };
+
   return (
     <button
       type="button"
       aria-label={label}
       aria-pressed={isBookmarked}
-      onClick={() => toggleBookmark(movieId)}
-      className={cn(buttonStyles[variant], className)}
+      onClick={handleClick}
+      disabled={
+        Boolean(accessToken) &&
+        (favoriteQuery.isPending ||
+          favoriteQuery.isError ||
+          favoriteMutation.isPending)
+      }
+      className={cn(
+        buttonStyles[variant],
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
     >
       <img
         src={
