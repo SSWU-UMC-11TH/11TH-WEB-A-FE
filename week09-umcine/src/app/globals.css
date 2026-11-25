@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  color: #111;
+  background-color: #fff;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.bookmark-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.bookmark-btn img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+.bookmark-btn:disabled {
+  cursor: not-allowed;
+}
