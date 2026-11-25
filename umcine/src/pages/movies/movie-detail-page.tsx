@@ -33,7 +33,7 @@ export function MovieDetailPage() {
     retry: false,
   });
 
-  const memberId = meQuery.data?.memberId;
+  const memberId = accessToken ? meQuery.data?.memberId : undefined;
 
   const ratingsQuery = useQuery({
     queryKey: ['ratings', 'member', memberId],
@@ -42,14 +42,16 @@ export function MovieDetailPage() {
     retry: false,
   });
 
-  const myRating = ratingsQuery.data?.find(
-    (item) => item.movieId === Number(movieId),
-  );
+  const myRating =
+    accessToken && memberId != null
+      ? ratingsQuery.data?.find((item) => item.movieId === Number(movieId))
+      : undefined;
   const [ratingInput, setRating] = useState<number | null>(null);
   const [reviewInput, setReview] = useState<string | null>(null);
 
-  const rating = ratingInput ?? myRating?.score ?? 0;
-  const review = reviewInput ?? myRating?.comment ?? '';
+  const rating = accessToken ? (ratingInput ?? myRating?.score ?? 0) : 0;
+
+  const review = accessToken ? (reviewInput ?? myRating?.comment ?? '') : '';
   const createRatingMutation = useCreateRatingMutation();
   const updateRatingMutation = useUpdateRatingMutation();
   const deleteRatingMutation = useDeleteRatingMutation();
@@ -272,6 +274,19 @@ export function MovieDetailPage() {
             />
             즐겨찾기
           </button>
+          {accessToken && favoriteQuery.isError && (
+            <div className="mt-2 text-sm text-red-500">
+              즐겨찾기 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={() => favoriteQuery.refetch()}
+                disabled={favoriteQuery.isFetching}
+                className="ml-2 underline"
+              >
+                {favoriteQuery.isFetching ? '조회 중' : '다시 시도'}
+              </button>
+            </div>
+          )}
         </div>
 
         <aside className="w-full border-t border-[#E3E6EB] pt-5 lg:w-[329px] lg:shrink-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
@@ -307,7 +322,31 @@ export function MovieDetailPage() {
             placeholder="영화를 보고 느낀 점을 남겨보세요."
             className="mt-3 h-[102px] w-full resize-none rounded-lg border border-[#E3E6EB] bg-white p-3 text-sm text-[#17191E] outline-none focus:border-[#2563EB] focus:ring-0"
           />
+          {meQuery.isError && (
+            <div className="text-sm text-red-500">
+              회원 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={() => meQuery.refetch()}
+                className="ml-2 underline"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
 
+          {ratingsQuery.isError && (
+            <div className="text-sm text-red-500">
+              평점 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={() => ratingsQuery.refetch()}
+                className="ml-2 underline"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
           <button
             type="button"
             onClick={handleSaveRating}

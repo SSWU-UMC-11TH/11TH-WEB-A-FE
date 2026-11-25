@@ -73,7 +73,19 @@ export function MovieListPage() {
   return (
     <main className="mx-auto w-full max-w-[1440px] flex-1 flex-col gap-5 px-20 pb-10 pt-6">
       <h1 className="text-[38px] font-bold text-[#17191e]">영화 목록</h1>
-
+      {accessToken && favoritesQuery.isError && (
+        <div className="mb-4 text-sm text-red-500">
+          즐겨찾기 정보를 불러오지 못했습니다.
+          <button
+            type="button"
+            onClick={() => favoritesQuery.refetch()}
+            disabled={favoritesQuery.isFetching}
+            className="ml-2 underline"
+          >
+            {favoritesQuery.isFetching ? '조회 중' : '다시 시도'}
+          </button>
+        </div>
+      )}
       {moviesQuery.isRefetchError && (
         <p className="text-sm text-red-500">
           최신 영화 목록을 불러오지 못했습니다. 이전 영화 목록을 표시합니다.

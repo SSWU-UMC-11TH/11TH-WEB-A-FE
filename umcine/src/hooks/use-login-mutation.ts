@@ -10,10 +10,38 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: login,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
+      // 이전 계정의 진행 중인 조회 취소
+      await queryClient.cancelQueries({
+        queryKey: ['members'],
+      });
+
+      await queryClient.cancelQueries({
+        queryKey: ['favorites'],
+      });
+
+      await queryClient.cancelQueries({
+        queryKey: ['ratings'],
+      });
+
+      // 이전 계정의 회원 정보 캐시 제거
+      queryClient.removeQueries({
+        queryKey: ['members'],
+      });
+
+      // 이전 계정의 즐겨찾기 캐시 제거
+      queryClient.removeQueries({
+        queryKey: ['favorites'],
+      });
+
+      // 이전 계정의 평점 캐시 제거
+      queryClient.removeQueries({
+        queryKey: ['ratings'],
+      });
+
+      // 새 로그인 토큰 저장
       setAccessToken(response.result.accessToken);
-      alert('로그인에 성공했어요.');
-      queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
+
       navigate({ to: '/' });
     },
     onError: () => {

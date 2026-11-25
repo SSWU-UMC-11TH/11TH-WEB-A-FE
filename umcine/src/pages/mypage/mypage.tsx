@@ -33,7 +33,20 @@ export function MyPage() {
   const favoriteMovies = favoriteMovieQueries.flatMap((query) =>
     query.data ? [query.data] : [],
   );
+  const retryFavoriteMovies = () => {
+    favoriteMovieQueries.forEach((query) => {
+      if (query.isError && !query.isFetching) {
+        void query.refetch();
+      }
+    });
+  };
+  const isFavoriteMoviesLoading = favoriteMovieQueries.some(
+    (query) => query.isPending,
+  );
 
+  const isFavoriteMoviesError = favoriteMovieQueries.some(
+    (query) => query.isError,
+  );
   const user = meQuery.data;
 
   if (!accessToken) {
@@ -115,6 +128,25 @@ export function MyPage() {
 
           {favoritesQuery.isSuccess && favorites.length === 0 && (
             <p className="text-gray-500">등록된 즐겨찾기가 없어요.</p>
+          )}
+          {isFavoriteMoviesLoading && (
+            <p className="mb-3 text-sm">
+              즐겨찾기 영화 정보를 불러오는 중이에요.
+            </p>
+          )}
+
+          {/* 영화 상세 조회 실패 */}
+          {isFavoriteMoviesError && (
+            <div className="mb-3 text-sm text-red-500">
+              일부 영화 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={retryFavoriteMovies}
+                className="ml-2 underline"
+              >
+                다시 시도
+              </button>
+            </div>
           )}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
             {favoriteMovies.map((movie) => (

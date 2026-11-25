@@ -120,6 +120,19 @@ function SearchPageContent({ query }: { query: string }) {
           {normalizedQuery ? '다시 검색' : '검색'}
         </button>
       </form>
+      {accessToken && favoritesQuery.isError && (
+        <div className="mt-5 text-sm text-red-500">
+          즐겨찾기 정보를 불러오지 못했습니다.
+          <button
+            type="button"
+            onClick={() => favoritesQuery.refetch()}
+            disabled={favoritesQuery.isFetching}
+            className="ml-2 underline"
+          >
+            {favoritesQuery.isFetching ? '조회 중' : '다시 시도'}
+          </button>
+        </div>
+      )}
 
       {/* 검색어가 없을 때 */}
       {!normalizedQuery ? (

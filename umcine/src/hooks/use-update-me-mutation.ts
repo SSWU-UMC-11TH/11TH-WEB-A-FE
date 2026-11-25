@@ -7,7 +7,11 @@ export function useUpdateMeMutation() {
 
   return useMutation({
     mutationFn: updateMe,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
+      await queryClient.cancelQueries({
+        queryKey: ['members', 'me'],
+      });
+
       queryClient.setQueryData<MemberInfo>(['members', 'me'], response.result);
       alert('내 정보 수정에 성공했어요.');
     },

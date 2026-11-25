@@ -12,9 +12,17 @@ export const authApi = apiClient.extend({
       },
     ],
     afterResponse: [
-      ({ response }) => {
+      ({ request, response }) => {
         if (response.status === 401) {
-          useAuthStore.getState().setAccessToken(null);
+          const currentToken = useAuthStore.getState().accessToken;
+          const requestAuthorization = request.headers.get('Authorization');
+
+          if (
+            currentToken &&
+            requestAuthorization === `Bearer ${currentToken}`
+          ) {
+            useAuthStore.getState().setAccessToken(null);
+          }
         }
       },
     ],
