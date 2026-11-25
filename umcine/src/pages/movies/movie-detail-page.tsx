@@ -3,26 +3,17 @@ import { Link, useParams } from '@tanstack/react-router';
 import { getMovieDetail } from '../../api/movies/get-movie-detail';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '../../utils/cn';
-import { useBookmarkStore } from '../../stores/bookmark-store';
 
-function getSavedRating(movieId: string) {
-  try {
-    const saved = localStorage.getItem(`movie-rating-${movieId}`);
+import { useAuthStore } from '../../stores/auth-store';
+import { getFavorite } from '../../api/favorites/get-favorite';
+import { useCreateFavoriteMutation } from '../../hooks/use-create-favorite-mutation';
+import { useDeleteFavoriteMutation } from '../../hooks/use-delete-favorite-mutation';
+import { getMe } from '../../api/members/me';
+import { getMemberRatings } from '../../api/ratings/get-member-ratings';
+import { useCreateRatingMutation } from '../../hooks/use-create-rating-mutation';
+import { useUpdateRatingMutation } from '../../hooks/use-update-rating-mutation';
+import { useDeleteRatingMutation } from '../../hooks/use-delete-rating-mutation';
 
-    if (saved) {
-      const parsed = JSON.parse(saved);
-
-      return {
-        rating: typeof parsed.rating === 'number' ? parsed.rating : 0,
-        review: typeof parsed.review === 'string' ? parsed.review : '',
-      };
-    }
-  } catch (error) {
-    console.error('저장된 평점과 후기를 불러오지 못했습니다.', error);
-  }
-
-  return { rating: 0, review: '' };
-}
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: '/movies/$movieId' });
 
@@ -33,34 +24,127 @@ export function MovieDetailPage() {
 
   const movie = movieDetailQuery.data;
 
-  const bookmarkedMovieIds = useBookmarkStore(
-    (state) => state.bookmarkedMovieIds,
-  );
-  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const meQuery = useQuery({
+    queryKey: ['members', 'me'],
+    queryFn: getMe,
+    enabled: Boolean(accessToken),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
 
-  const isBookmarked = movie ? bookmarkedMovieIds.includes(movie.id) : false;
+  const memberId = accessToken ? meQuery.data?.memberId : undefined;
 
-  const [savedRating] = useState(() => getSavedRating(movieId));
-  const [rating, setRating] = useState(savedRating.rating);
-  const [review, setReview] = useState(savedRating.review);
+  const ratingsQuery = useQuery({
+    queryKey: ['ratings', 'member', memberId],
+    queryFn: () => getMemberRatings(memberId!),
+    enabled: Boolean(accessToken) && memberId != null,
+    retry: false,
+  });
 
-  function handleSaveRating() {
-    if (rating === 0) return;
-    try {
-      localStorage.setItem(
-        `movie-rating-${movieId}`,
-        JSON.stringify({
-          rating,
-          review,
-        }),
-      );
+  const myRating =
+    accessToken && memberId != null
+      ? ratingsQuery.data?.find((item) => item.movieId === Number(movieId))
+      : undefined;
+  const [ratingInput, setRating] = useState<number | null>(null);
+  const [reviewInput, setReview] = useState<string | null>(null);
 
-      alert('평점이 저장되었습니다!');
-    } catch {
-      alert('평점을 저장하지 못했어요, 잠시 후 다시 시도해 주세요');
+  const rating = accessToken ? (ratingInput ?? myRating?.score ?? 0) : 0;
+
+  const review = accessToken ? (reviewInput ?? myRating?.comment ?? '') : '';
+  const createRatingMutation = useCreateRatingMutation();
+  const updateRatingMutation = useUpdateRatingMutation();
+  const deleteRatingMutation = useDeleteRatingMutation();
+
+  const isRatingPending =
+    createRatingMutation.isPending ||
+    updateRatingMutation.isPending ||
+    deleteRatingMutation.isPending;
+
+  // 확인용 코드 추가
+  console.log('회원 정보:', meQuery.data);
+  console.log('회원 ID:', memberId);
+  console.log('평점:', rating);
+  console.log('평점 조회 상태:', ratingsQuery.status);
+  console.log('평점 조회 오류:', ratingsQuery.error);
+  console.log('평점 요청 중:', isRatingPending);
+  const favoriteQuery = useQuery({
+    queryKey: ['favorites', 'detail', Number(movieId)],
+    queryFn: () => getFavorite(Number(movieId)),
+    enabled: Boolean(accessToken),
+    retry: false,
+  });
+  const isBookmarked =
+    Boolean(accessToken) && (favoriteQuery.data?.isFavorite ?? false);
+
+  const createFavoriteMutation = useCreateFavoriteMutation();
+  const deleteFavoriteMutation = useDeleteFavoriteMutation();
+
+  const isFavoritePending =
+    createFavoriteMutation.isPending || deleteFavoriteMutation.isPending;
+
+  function handleToggleFavorite() {
+    if (!accessToken) {
+      alert('로그인이 필요한 기능이에요.');
+      return;
+    }
+
+    if (
+      isFavoritePending ||
+      favoriteQuery.isFetching ||
+      !favoriteQuery.isSuccess
+    ) {
+      return;
+    }
+
+    if (isBookmarked) {
+      deleteFavoriteMutation.mutate(Number(movieId));
+    } else {
+      createFavoriteMutation.mutate({
+        movieId: Number(movieId),
+      });
     }
   }
+  function handleSaveRating() {
+    if (!accessToken) {
+      alert('로그인이 필요한 기능이에요.');
+      return;
+    }
 
+    if (
+      rating === 0 ||
+      isRatingPending ||
+      ratingsQuery.isFetching ||
+      !ratingsQuery.isSuccess
+    )
+      return;
+
+    if (myRating) {
+      updateRatingMutation.mutate({
+        ratingId: myRating.ratingId,
+        score: rating,
+        comment: review,
+      });
+    } else {
+      createRatingMutation.mutate({
+        movieId: Number(movieId),
+        score: rating,
+        comment: review,
+      });
+    }
+  }
+  function handleDeleteRating() {
+    if (!accessToken || !myRating || isRatingPending) return;
+
+    if (!confirm('평점을 삭제하시겠어요?')) return;
+
+    deleteRatingMutation.mutate(myRating.ratingId, {
+      onSuccess: () => {
+        setRating(0);
+        setReview('');
+      },
+    });
+  }
   if (movieDetailQuery.isPending) {
     return (
       <main className="mx-auto w-full max-w-[1440px] px-6 py-20 text-center">
@@ -165,11 +249,16 @@ export function MovieDetailPage() {
 
           <button
             type="button"
-            onClick={() => toggleBookmark(movie.id)}
+            onClick={handleToggleFavorite}
+            disabled={
+              isFavoritePending ||
+              (Boolean(accessToken) &&
+                (favoriteQuery.isFetching || !favoriteQuery.isSuccess))
+            }
             aria-label={`${movie.title} 북마크`}
             aria-pressed={isBookmarked}
             className={cn(
-              'mt-4 flex h-[42px] w-[107px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-white px-2 text-[14px] font-extrabold text-white',
+              'mt-4 flex h-[42px] w-[107px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-white px-2 text-[14px] font-extrabold text-white disabled:opacity-50',
               isBookmarked ? 'bg-[#1d4ed8]' : 'bg-[#2563eb]',
             )}
           >
@@ -185,6 +274,19 @@ export function MovieDetailPage() {
             />
             즐겨찾기
           </button>
+          {accessToken && favoriteQuery.isError && (
+            <div className="mt-2 text-sm text-red-500">
+              즐겨찾기 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={() => favoriteQuery.refetch()}
+                disabled={favoriteQuery.isFetching}
+                className="ml-2 underline"
+              >
+                {favoriteQuery.isFetching ? '조회 중' : '다시 시도'}
+              </button>
+            </div>
+          )}
         </div>
 
         <aside className="w-full border-t border-[#E3E6EB] pt-5 lg:w-[329px] lg:shrink-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
@@ -220,15 +322,55 @@ export function MovieDetailPage() {
             placeholder="영화를 보고 느낀 점을 남겨보세요."
             className="mt-3 h-[102px] w-full resize-none rounded-lg border border-[#E3E6EB] bg-white p-3 text-sm text-[#17191E] outline-none focus:border-[#2563EB] focus:ring-0"
           />
+          {meQuery.isError && (
+            <div className="text-sm text-red-500">
+              회원 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={() => meQuery.refetch()}
+                className="ml-2 underline"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
 
+          {ratingsQuery.isError && (
+            <div className="text-sm text-red-500">
+              평점 정보를 불러오지 못했습니다.
+              <button
+                type="button"
+                onClick={() => ratingsQuery.refetch()}
+                className="ml-2 underline"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
           <button
             type="button"
             onClick={handleSaveRating}
-            disabled={rating === 0}
+            disabled={
+              rating === 0 ||
+              isRatingPending ||
+              !accessToken ||
+              !ratingsQuery.isSuccess ||
+              ratingsQuery.isFetching
+            }
             className="mt-2 h-[42px] w-full rounded-md bg-[#17191e] py-3 text-sm font-extrabold text-white disabled:opacity-50"
           >
-            평점 저장
+            {isRatingPending ? '처리 중' : myRating ? '평점 수정' : '평점 저장'}
           </button>
+          {myRating && (
+            <button
+              type="button"
+              onClick={handleDeleteRating}
+              disabled={!accessToken || isRatingPending}
+              className="mt-2 h-[42px] w-full rounded-md border border-red-500 text-sm font-bold text-red-500 disabled:opacity-50"
+            >
+              평점 삭제
+            </button>
+          )}
         </aside>
       </section>
     </main>

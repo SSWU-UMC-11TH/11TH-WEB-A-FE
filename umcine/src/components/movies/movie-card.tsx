@@ -1,24 +1,19 @@
 import { cn } from '../../utils/cn';
 import { Link } from '@tanstack/react-router';
 import type { TmdbMovieListItem } from '../../api/movies/models';
-import { useBookmarkStore } from '../../stores/bookmark-store';
 
 interface MovieCardProps {
   movie: TmdbMovieListItem;
+  isBookmarked: boolean;
   onToggleBookmark: (id: number) => void;
 }
 
-function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
-  // Zustand에서 북마크 여부 확인
-  const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(movie.id),
-  );
-
+function MovieCard({ movie, isBookmarked, onToggleBookmark }: MovieCardProps) {
   // TMDB 포스터 이미지 주소
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : null;
-
+  console.log('영화 카드:', movie.id, isBookmarked);
   return (
     <article className="w-full min-w-0">
       <div className="relative h-[274px] w-full overflow-hidden rounded-lg bg-[#eee]">

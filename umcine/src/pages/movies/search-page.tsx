@@ -2,7 +2,10 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { useState, type SubmitEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies/search-movies';
-import { useBookmarkStore } from '../../stores/bookmark-store';
+import { useAuthStore } from '../../stores/auth-store';
+import { getFavorites } from '../../api/favorites/get-favorites';
+import { useCreateFavoriteMutation } from '../../hooks/use-create-favorite-mutation';
+import { useDeleteFavoriteMutation } from '../../hooks/use-delete-favorite-mutation';
 
 export function SearchPage() {
   const { query } = useSearch({ from: '/search' });
@@ -13,13 +16,15 @@ export function SearchPage() {
 function SearchPageContent({ query }: { query: string }) {
   const navigate = useNavigate({ from: '/search' });
 
+  const accessToken = useAuthStore((state) => state.accessToken);
+
   // 검색창에 입력하는 텍스트
   const [searchText, setSearchText] = useState(query);
 
   // 실제 검색에 사용할 검색어
   const normalizedQuery = query.trim();
 
-  // 6주차: useQuery로 검색 API 호출
+  // 검색 API 호출
   const searchQuery = useQuery({
     queryKey: ['movies', 'search', { query: normalizedQuery }],
     queryFn: () => searchMovies({ query: normalizedQuery }),
@@ -28,11 +33,46 @@ function SearchPageContent({ query }: { query: string }) {
 
   const searchResults = searchQuery.data?.results ?? [];
 
-  // 기존 북마크 기능 유지
-  const bookmarkedMovieIds = useBookmarkStore(
-    (state) => state.bookmarkedMovieIds,
-  );
-  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+  // 서버 즐겨찾기 목록 조회
+  const favoritesQuery = useQuery({
+    queryKey: ['favorites', 'list'],
+    queryFn: getFavorites,
+    enabled: Boolean(accessToken),
+    retry: false,
+  });
+
+  const bookmarkedMovieIds = accessToken
+    ? (favoritesQuery.data ?? []).map((favorite) => favorite.movieId)
+    : [];
+
+  // 즐겨찾기 등록 및 삭제 Mutation
+  const createFavoriteMutation = useCreateFavoriteMutation();
+  const deleteFavoriteMutation = useDeleteFavoriteMutation();
+
+  const isFavoritePending =
+    createFavoriteMutation.isPending || deleteFavoriteMutation.isPending;
+
+  // 즐겨찾기 등록 및 삭제
+  function toggleBookmark(movieId: number) {
+    if (!accessToken) {
+      alert('로그인이 필요한 기능이에요.');
+      return;
+    }
+
+    if (
+      isFavoritePending ||
+      favoritesQuery.isFetching ||
+      !favoritesQuery.isSuccess
+    ) {
+      return;
+    }
+
+    if (bookmarkedMovieIds.includes(movieId)) {
+      deleteFavoriteMutation.mutate(movieId);
+    } else {
+      createFavoriteMutation.mutate({ movieId });
+    }
+  }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,6 +120,19 @@ function SearchPageContent({ query }: { query: string }) {
           {normalizedQuery ? '다시 검색' : '검색'}
         </button>
       </form>
+      {accessToken && favoritesQuery.isError && (
+        <div className="mt-5 text-sm text-red-500">
+          즐겨찾기 정보를 불러오지 못했습니다.
+          <button
+            type="button"
+            onClick={() => favoritesQuery.refetch()}
+            disabled={favoritesQuery.isFetching}
+            className="ml-2 underline"
+          >
+            {favoritesQuery.isFetching ? '조회 중' : '다시 시도'}
+          </button>
+        </div>
+      )}
 
       {/* 검색어가 없을 때 */}
       {!normalizedQuery ? (
@@ -95,11 +148,13 @@ function SearchPageContent({ query }: { query: string }) {
               영화 {searchQuery.data?.total_results ?? 0}편 · 1페이지
             </p>
           </div>
+
           {searchQuery.isRefetchError && (
             <p className="mt-5 text-sm text-red-500">
               검색 결과를 갱신하지 못했습니다. 이전 검색 결과를 표시합니다.
             </p>
           )}
+
           {/* 로딩 / 오류 / 빈 결과 / 성공 */}
           {searchQuery.isLoading ? (
             <p className="mt-5">검색 결과를 불러오는 중이에요.</p>
@@ -142,6 +197,10 @@ function SearchPageContent({ query }: { query: string }) {
                           onClick={() => toggleBookmark(movie.id)}
                           aria-label={`${movie.title} 북마크`}
                           aria-pressed={isBookmarked}
+                          disabled={
+                            isFavoritePending ||
+                            (Boolean(accessToken) && !favoritesQuery.isSuccess)
+                          }
                         >
                           <img
                             src={
