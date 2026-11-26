@@ -4,25 +4,28 @@ import { useEffect, useState, type SubmitEvent } from "react";
 import Link from "next/link";
 import { useLoginMutation } from "../hooks/use-login-mutation";
 import { useAuthStore } from "../stores/auth-store";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getSafeCallbackUrl } from "@/utils/get-safe-callback-url";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const accessToken = useAuthStore((state) => state.accessToken);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const loginMutation = useLoginMutation();
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+  const loginMutation = useLoginMutation(callbackUrl);
 
   useEffect(() => {
-    if (hasHydrated && accessToken) {
-      router.replace("/");
+    if (accessToken) {
+      router.replace(callbackUrl);
     }
-  }, [hasHydrated, accessToken, router]);
+  }, [accessToken, router, callbackUrl]);
 
   const canSubmit = EMAIL_REGEX.test(email.trim()) && password.length > 0;
 

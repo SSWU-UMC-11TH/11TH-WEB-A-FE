@@ -1,24 +1,23 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 
-export function AuthGuard({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const accessToken = useAuthStore((state) => state.accessToken);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   useEffect(() => {
     if (hasHydrated && !accessToken) {
-      router.replace("/login");
+      const callbackUrl = pathname + window.location.search;
+
+      router.replace(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [hasHydrated, accessToken, router]);
+  }, [hasHydrated, accessToken, router, pathname]);
 
   if (!hasHydrated) {
     return (
