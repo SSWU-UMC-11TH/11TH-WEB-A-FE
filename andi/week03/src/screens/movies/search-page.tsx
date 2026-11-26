@@ -1,5 +1,7 @@
+"use client";
 
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchMovies } from "../../api/movies/search-movies";
@@ -7,15 +9,16 @@ import { mapMovie } from "../../api/movies/movie-mapper";
 import BookmarkButton from "../../components/movies/bookmark-button";
 
 export function SearchPage() {
-  const { query } = useSearch({ from: "/search" });
-  const navigate = useNavigate({ from: "/search" });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const query = searchParams.get("query") ?? "";
 
-  const [searchText, setSearchText] = useState(query ?? "");
+  const [searchText, setSearchText] = useState(query);
 
-  const normalizedQuery = query?.trim() ?? "";
+  const normalizedQuery = query.trim();
 
   useEffect(() => {
-    setSearchText(query ?? "");
+    setSearchText(query);
   }, [query]);
 
   const searchQuery = useQuery({
@@ -35,14 +38,17 @@ export function SearchPage() {
 
     const nextQuery = searchText.trim();
 
-    navigate({
-      search: nextQuery ? { query: nextQuery } : {},
-    });
+    if (nextQuery) {
+      const params = new URLSearchParams({ query: nextQuery });
+      router.push(`/search?${params.toString()}`);
+    } else {
+      router.push("/search");
+    }
   }
 
   function handleResetSearch() {
     setSearchText("");
-    navigate({ search: {} });
+    router.push("/search");
   }
 
   return (
@@ -127,8 +133,7 @@ export function SearchPage() {
                     className="flex gap-5 border-b border-gray-200 py-7"
                   >
                     <Link
-                      to="/movies/$movieId"
-                      params={{ movieId: String(movie.id) }}
+                      href={`/movies/${movie.id}`}
                       className="shrink-0"
                     >
                       {movie.posterPath ? (
@@ -158,8 +163,7 @@ export function SearchPage() {
                       </p>
 
                       <Link
-                        to="/movies/$movieId"
-                        params={{ movieId: String(movie.id) }}
+                        href={`/movies/${movie.id}`}
                         className="mt-3 inline-block text-sm font-semibold text-blue-600"
                       >
                         상세 보기 →
@@ -200,7 +204,6 @@ export function SearchPage() {
                 placeholder="예: 스파이더맨"
                 className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-gray-900 outline-none placeholder:text-gray-400"
               />
-
               <button
                 type="submit"
                 className="h-10 rounded-md bg-gray-900 px-6 text-sm font-semibold text-white"
