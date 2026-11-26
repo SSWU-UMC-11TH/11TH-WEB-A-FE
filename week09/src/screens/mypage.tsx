@@ -53,13 +53,8 @@ export function MyPage() {
     query.data ? [toMovieDetail(query.data)] : [],
   );
 
-  const isFavoritesLoading =
-    favoritesQuery.isLoading ||
-    favoriteMovieQueries.some((query) => query.isPending);
-
-  const isFavoritesError =
-    favoritesQuery.isError ||
-    favoriteMovieQueries.some((query) => query.isError);
+  const isFavoritesLoading = favoritesQuery.isLoading;
+  const isFavoritesError = favoritesQuery.isError;
 
   function handleLogout() {
     setAccessToken(null);
@@ -167,37 +162,79 @@ export function MyPage() {
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {paginatedFavorites.map((movie) => (
-                <Link
-                  key={movie.id}
-                  href={`/movies/${movie.id}`}
-                  className="min-w-0 no-underline"
-                >
-                  <div className="relative aspect-[0.87] overflow-hidden rounded-lg bg-[#E3E6EB]">
-                    {movie.posterPath ? (
-                      <Image
-                        src={movie.posterPath}
-                        alt={`${movie.title} 포스터`}
-                        fill
-                        sizes="(max-width: 768px) 50vw, 20vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-xs text-gray-500">
-                        포스터 없음
+              {currentFavorites.map((favorite, index) => {
+                const movieQuery = favoriteMovieQueries[index];
+
+                // 개별 영화 상세 조회 로딩
+                if (movieQuery.isPending) {
+                  return (
+                    <div key={favorite.movieId} className="min-w-0">
+                      <div className="flex aspect-[0.87] items-center justify-center rounded-lg bg-[#E3E6EB] text-xs text-gray-500">
+                        불러오는 중...
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  );
+                }
 
-                  <h3 className="mt-2 truncate text-sm font-bold text-[#17191E]">
-                    {movie.title}
-                  </h3>
+                // 개별 영화 상세 조회 실패
+                if (!movieQuery.data) {
+                  return (
+                    <div key={favorite.movieId} className="min-w-0">
+                      <div className="flex aspect-[0.87] flex-col items-center justify-center gap-2 rounded-lg bg-[#E3E6EB] p-2">
+                        <p className="text-center text-xs text-red-500">
+                          영화 조회 실패
+                        </p>
 
-                  <p className="mt-1 text-xs text-[#969DA8]">
-                    {movie.releaseDate}
-                  </p>
-                </Link>
-              ))}
+                        <button
+                          type="button"
+                          onClick={() => movieQuery.refetch()}
+                          disabled={movieQuery.isFetching}
+                          className="rounded-lg bg-[#2563EB] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                        >
+                          {movieQuery.isFetching
+                            ? "불러오는 중..."
+                            : "다시 시도"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // 정상 조회된 영화
+                const movie = toMovieDetail(movieQuery.data);
+
+                return (
+                  <Link
+                    key={favorite.movieId}
+                    href={`/movies/${movie.id}`}
+                    className="min-w-0 no-underline"
+                  >
+                    <div className="relative aspect-[0.87] overflow-hidden rounded-lg bg-[#E3E6EB]">
+                      {movie.posterPath ? (
+                        <Image
+                          src={movie.posterPath}
+                          alt={`${movie.title} 포스터`}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 20vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-gray-500">
+                          포스터 없음
+                        </div>
+                      )}
+                    </div>
+
+                    <h3 className="mt-2 truncate text-sm font-bold text-[#17191E]">
+                      {movie.title}
+                    </h3>
+
+                    <p className="mt-1 text-xs text-[#969DA8]">
+                      {movie.releaseDate}
+                    </p>
+                  </Link>
+                );
+              })}
             </div>
           )}
 

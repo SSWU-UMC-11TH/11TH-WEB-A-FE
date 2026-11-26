@@ -48,7 +48,7 @@ export function MovieListPage({
     initialData: page === 1 ? initialData : undefined,
   });
   const movies = moviesQuery.data?.results.map(toMovie) ?? [];
-  const totalPages = moviesQuery.data?.total_pages ?? 0;
+  const totalPages = Math.min(moviesQuery.data?.total_pages ?? 0, 500);
 
   function handleViewModeChange(nextViewMode: "default" | "compact") {
     setViewMode(nextViewMode);
