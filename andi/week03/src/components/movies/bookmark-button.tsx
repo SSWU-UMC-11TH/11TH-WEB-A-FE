@@ -1,5 +1,7 @@
 
-import { useNavigate } from "@tanstack/react-router";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../stores/auth-store";
 import {
   useFavoriteMutation,
@@ -18,7 +20,7 @@ function BookmarkButton({
   variant = "card",
   className,
 }: BookmarkButtonProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const accessToken = useAuthStore((state) => state.accessToken);
 
   const favoriteQuery = useFavoriteStatus(movieId);
@@ -42,7 +44,7 @@ function BookmarkButton({
 
   const handleClick = () => {
     if (!accessToken) {
-      navigate({ to: "/login" });
+      router.push("/login");
       return;
     }
 
