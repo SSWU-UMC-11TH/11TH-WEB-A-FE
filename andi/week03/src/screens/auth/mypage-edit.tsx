@@ -1,12 +1,13 @@
+"use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getMe } from "../../api/members/me";
 import { useUpdateMeMutation } from "../../hooks/use-update-me-mutation";
 
 export function MyPageEdit() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [nickname, setNickname] = useState("");
   const [isDirty, setIsDirty] = useState(false);
 
@@ -39,7 +40,7 @@ export function MyPageEdit() {
       { nickname: trimmedNickname },
       {
         onSuccess: () => {
-          navigate({ to: "/mypage" });
+          router.push("/mypage");
         },
       },
     );
@@ -112,7 +113,7 @@ export function MyPageEdit() {
         <div className="flex gap-3 pt-3">
           <button
             type="button"
-            onClick={() => navigate({ to: "/mypage" })}
+            onClick={() => router.push("/mypage")}
             className="flex-1 rounded-lg border border-gray-300 p-3 font-medium"
           >
             취소

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import Providers from "./providers";
+import { Header } from "../components/layout/header";
 import "../index.css";
 
 export default function RootLayout({
@@ -8,7 +10,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

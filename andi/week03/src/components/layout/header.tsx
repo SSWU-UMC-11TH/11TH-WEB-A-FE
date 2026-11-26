@@ -1,18 +1,19 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../stores/auth-store";
 import { cn } from "../../utils/cn";
 
 export function Header() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const accessToken = useAuthStore((state) => state.accessToken);
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
 
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
+  const pathname = usePathname();
 
   const isMoviesActive =
     pathname === "/" || pathname.startsWith("/movies/");
@@ -27,11 +28,11 @@ export function Header() {
         : "border-transparent font-medium text-gray-500"
     );
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setAccessToken(null);
     queryClient.clear();
 
-    await navigate({ to: "/" });
+    router.push("/");
   };
 
   return (
@@ -39,7 +40,7 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-8">
         <div className="flex items-center gap-9">
           <Link
-            to="/"
+            href="/"
             className="flex items-center gap-2 text-gray-900 no-underline"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-[7px] border-2 border-gray-900">
@@ -55,18 +56,17 @@ export function Header() {
           </Link>
 
           <nav className="flex items-center gap-7">
-            <Link to="/" className={menuClass(isMoviesActive)}>
+            <Link href="/" className={menuClass(isMoviesActive)}>
               영화
             </Link>
             <Link
-              to="/search"
-              search={{}}
+              href="/search"
               className={menuClass(isSearchActive)}
             >
               검색
             </Link>
             <Link
-              to="/mypage"
+              href="/mypage"
               className={menuClass(isMyPageActive)}
             >
               내 정보
@@ -76,8 +76,7 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/search"
-            search={{}}
+            href="/search"
             aria-label="영화 검색"
             className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-200"
           >
@@ -98,7 +97,7 @@ export function Header() {
             </button>
           ) : (
             <Link
-              to="/login"
+              href="/login"
               className="flex h-9 items-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white no-underline"
             >
               로그인
