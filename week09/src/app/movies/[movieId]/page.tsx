@@ -1,5 +1,5 @@
 import { MovieDetailPage } from "@/screens/movies/movie-detail-page";
-import { getMovieDetail } from "@/api/movies";
+import { getMovieDetail } from "@/api/movies-server";
 import { toMovieDetail } from "@/api/movie-adapter";
 
 export default async function Page({

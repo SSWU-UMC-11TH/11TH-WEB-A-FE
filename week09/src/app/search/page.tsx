@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { SearchPage } from "@/screens/movies/search-page";
-import { searchMovies } from "@/api/movies";
+import { searchMovies } from "@/api/movies-server";
 
 type SearchParams = Promise<{
   query?: string | string[];

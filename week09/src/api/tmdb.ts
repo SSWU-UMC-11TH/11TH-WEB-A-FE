@@ -1,10 +1,11 @@
+import "server-only";
 import ky from "ky";
-import { env } from "../config/env";
+import { serverEnv } from "../config/server-env";
 
 export const tmdb = ky.create({
-  prefix: env.tmdbApiBaseUrl,
+  prefix: serverEnv.tmdbApiBaseUrl,
   headers: {
-    Authorization: `Bearer ${env.tmdbAccessToken}`,
+    Authorization: `Bearer ${serverEnv.tmdbAccessToken}`,
     accept: "application/json",
   },
   timeout: 10000,

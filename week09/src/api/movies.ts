@@ -1,12 +1,12 @@
+import ky from "ky";
 import type { MovieListResponse, TmdbMovieDetail } from "../types/movie";
-import { tmdb } from "./tmdb";
 
 // 인기 영화 목록
 export async function getPopularMovies(page = 1) {
-  return tmdb
-    .get("movie/popular", {
+  return ky
+    .get("/api/movies", {
       searchParams: {
-        language: "ko-KR",
+        type: "popular",
         page,
       },
     })
@@ -15,11 +15,11 @@ export async function getPopularMovies(page = 1) {
 
 // 영화 검색
 export async function searchMovies(query: string, page = 1) {
-  return tmdb
-    .get("search/movie", {
+  return ky
+    .get("/api/movies", {
       searchParams: {
+        type: "search",
         query,
-        language: "ko-KR",
         page,
       },
     })
@@ -28,10 +28,11 @@ export async function searchMovies(query: string, page = 1) {
 
 // 영화 상세 조회
 export async function getMovieDetail(movieId: number) {
-  return tmdb
-    .get(`movie/${movieId}`, {
+  return ky
+    .get("/api/movies", {
       searchParams: {
-        language: "ko-KR",
+        type: "detail",
+        movieId,
       },
     })
     .json<TmdbMovieDetail>();

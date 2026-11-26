@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { MovieListPage } from "@/screens/movies/movie-list-page";
-import { getPopularMovies } from "@/api/movies";
+import { getPopularMovies } from "@/api/movies-server";
 
 async function MovieListContent() {
   const initialData = await getPopularMovies(1).catch(

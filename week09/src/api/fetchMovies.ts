@@ -1,14 +1,16 @@
 // 순수 fetch 실습 기록용
-import { env } from "../config/env";
+import "server-only";
+
+import { serverEnv } from "../config/server-env";
 import type { MovieListResponse } from "../types/movie";
 
 export async function fetchPopularMovies(): Promise<MovieListResponse> {
   const response = await fetch(
-    `${env.tmdbApiBaseUrl}/movie/popular?language=ko-KR&page=1`,
+    `${serverEnv.tmdbApiBaseUrl}/movie/popular?language=ko-KR&page=1`,
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${env.tmdbAccessToken}`,
+        Authorization: `Bearer ${serverEnv.tmdbAccessToken}`,
         accept: "application/json",
       },
     },
