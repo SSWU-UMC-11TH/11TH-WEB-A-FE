@@ -1,5 +1,4 @@
-
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import type { Movie } from "../../types/movie";
 import BookmarkButton from "./bookmark-button";
 
@@ -12,8 +11,7 @@ function MovieCard({ movie }: MovieCardProps) {
     <article>
       <div className="relative overflow-hidden rounded-lg bg-gray-200">
         <Link
-          to="/movies/$movieId"
-          params={{ movieId: String(movie.id) }}
+          href={`/movies/${movie.id}`}
           className="block"
         >
           {movie.posterPath ? (

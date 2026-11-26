@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getMe } from "../../api/members/me";
 import { useFavorites } from "../../hooks/use-favorites";
@@ -33,7 +35,7 @@ export function MyPage() {
 
   return (
     <main className="mx-auto max-w-lg px-6 py-16">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">
+      <h1 className="mb-8 text-3xl font-bold tracking-tight">
         내 정보
       </h1>
 
@@ -53,7 +55,7 @@ export function MyPage() {
         </div>
 
         <Link
-          to="/mypage/edit"
+          href="/mypage/edit"
           className="mt-6 block rounded-lg bg-blue-600 p-3 text-center font-semibold text-white no-underline"
         >
           내 정보 수정
@@ -80,7 +82,7 @@ export function MyPage() {
             </p>
 
             <Link
-              to="/"
+              href="/"
               className="mt-4 inline-block text-sm font-semibold text-blue-600"
             >
               영화 둘러보기
@@ -91,10 +93,7 @@ export function MyPage() {
             {favoritesQuery.data.map((favorite) => (
               <li key={favorite.favoriteId}>
                 <Link
-                  to="/movies/$movieId"
-                  params={{
-                    movieId: String(favorite.movieId),
-                  }}
+                  href={`/movies/${favorite.movieId}`}
                   className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 no-underline transition-colors hover:border-blue-300"
                 >
                   <div>

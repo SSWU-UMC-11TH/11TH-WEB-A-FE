@@ -1,6 +1,8 @@
 
+"use client";
+
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { useAuthStore } from "../../stores/auth-store";
 import { getMemberId } from "../../utils/get-member-id";
 import {
@@ -126,7 +128,7 @@ function MovieRatingContent({
           </p>
 
           <Link
-            to="/login"
+            href="/login"
             className="mt-4 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
           >
             로그인하기

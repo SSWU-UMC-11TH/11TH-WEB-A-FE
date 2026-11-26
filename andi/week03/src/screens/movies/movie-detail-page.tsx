@@ -1,5 +1,7 @@
+"use client";
 
-import { Link, useParams } from "@tanstack/react-router";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { mapMovieDetail } from "../../api/movies/movie-mapper";
@@ -7,9 +9,9 @@ import BookmarkButton from "../../components/movies/bookmark-button";
 import { MovieRatingSection } from "../../components/movies/movie-rating-section";
 
 export function MovieDetailPage() {
-  const { movieId: movieIdParam } = useParams({
-    from: "/movies/$movieId",
-  });
+  const { movieId: movieIdParam } = useParams<{
+    movieId: string;
+  }>();
 
   const movieId = Number(movieIdParam);
   const isValidMovieId =
@@ -35,7 +37,7 @@ export function MovieDetailPage() {
           </h1>
 
           <Link
-            to="/"
+            href="/"
             className="mt-5 inline-block text-sm font-semibold text-blue-600"
           >
             영화 목록으로 돌아가기
@@ -66,7 +68,7 @@ export function MovieDetailPage() {
           </h1>
 
           <Link
-            to="/"
+            href="/"
             className="mt-5 inline-block text-sm font-semibold text-blue-600"
           >
             영화 목록으로 돌아가기
@@ -102,7 +104,7 @@ export function MovieDetailPage() {
 
         <div className="absolute inset-x-0 top-0 mx-auto max-w-[1280px] px-8 pt-7">
           <Link
-            to="/"
+            href="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-white"
           >
             <span aria-hidden="true">‹</span>
