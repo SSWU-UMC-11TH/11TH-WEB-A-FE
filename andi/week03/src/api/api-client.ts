@@ -1,7 +1,6 @@
-
 import ky from "ky";
 
-const baseUrl = import.meta.env.VITE_UMC_API_BASE_URL;
+const baseUrl = process.env.NEXT_PUBLIC_UMC_API_BASE_URL;
 
 if (!baseUrl) {
   throw new Error("UMC API 환경 변수가 필요해요.");
