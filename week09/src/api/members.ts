@@ -39,7 +39,7 @@ export function getMemberRatings(
   page = 0,
   size = 10,
 ) {
-  return getBackend()
+  return getAuthBackend()
     .get(`members/${memberId}/ratings`, {
       searchParams: { page, size },
     })

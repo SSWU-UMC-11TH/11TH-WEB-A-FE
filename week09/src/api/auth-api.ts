@@ -6,7 +6,7 @@ export function getAuthBackend() {
     hooks: {
       beforeRequest: [
         ({ request }) => {
-          const accessToken = useAuthStore.getState().accessToken;
+          const { accessToken } = useAuthStore.getState();
 
           if (accessToken) {
             request.headers.set(
@@ -17,9 +17,18 @@ export function getAuthBackend() {
         },
       ],
       afterResponse: [
-        ({ response }) => {
-          if (response.status === 401) {
-            useAuthStore.getState().setAccessToken(null);
+        ({ request, response }) => {
+          if (response.status !== 401) return;
+
+          const { accessToken, setAccessToken } =
+            useAuthStore.getState();
+
+          if (
+            accessToken &&
+            request.headers.get("Authorization") ===
+              `Bearer ${accessToken}`
+          ) {
+            setAccessToken(null);
           }
         },
       ],
